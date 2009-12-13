@@ -1,0 +1,474 @@
+XChat-Guile README
+~~~~~~~~~~~~~
+XChat-Guile Copyright (c) 2005, 2006 By Zeeshan Ali <zeenix(AT)gstreamer.net>.
+            Copyright (c) 2006 By Lionel Elie Mamane <lionel@mamane.lu>
+
+This program is released under the terms of the GNU General
+Public License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
+USA".
+
+What is it?
+~~~~~~~~~~~~~
+XChat-Guile is a plugin for XChat that enables XChat plugin writers to
+write their plugins in Scheme language. Since it uses libguile, the plugin
+writers can do almost everything that they can do with guile. e.g It is 
+possible to do all kinds of gnome stuff using the guile-gnome modules.
+
+
+Plugin Writing basics:
+~~~~~~~~~~~~~
+The plugins are simple scheme/guile scripts, except that they must define the
+following symbols:
+
+xchat:plugin-name 		; A string specifying the name of the plugin
+xchat:plugin-description	; a few words about the plugin
+xchat:plugin-version		; A string specifying the version of the plugin
+xchat:plugin-init		; A procedure that is called for initializing
+				; the plugin. You can register your hooks here
+xchat:plugin-deinit		; A procedure that is called before a plugin
+				; is removed
+
+
+Commands:
+~~~~~~~~~~~~~
+The following commands will be intercepted by XChat-Guile Plugin, when it is
+loaded.
+
+/guile load <filename>
+    Load plugin with given filename.
+
+/guile unload <filename|plugin name>
+    Unload plugin with given filename, or plugin name.
+
+/load <filename>
+    Does the same as /guile load, but works only if filename has a .scm
+	extension (which is advised).
+
+/unload <filename|plugin name>
+    Does the same as /guile unload
+
+/guile eval <expression>
+    Evaluate given scheme expression. For example, 
+
+      /guile eval (display "Hello World!")
+      /guile eval (xchat:get-info"channel") 
+
+/guile about
+    Show some information about the XChat-Guile plugin.
+
+
+API:
+~~~~~~~~~~~~~
+
+--------------------------------------------------------
+xchat:print
+
+Prototype: (xchat:print text)
+
+Description: Prints some text to the current tab/window.
+
+Arguments:
+	text: Text to print. May contain mIRC color codes.
+
+Evaluates to: Nothing.
+
+Example: (xchat:print "Hello World")
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:emit-print
+
+Prototype: (xchat:emit-print event_name ...)
+
+Description: Generates a print event. This can be any event found in the 
+			 Preferences > Advanced > Text Events window.
+
+Arguments:
+	event_name: Text event to print.
+
+Evaluates to: #t on success, #f on failure.
+
+Example: (xchat:emit-print "Channel Message" "John" "Hi there" "@")
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:command
+
+Prototype: (xchat:command command)
+
+Description: Executes a command as if it were typed in xchat's input box.
+
+Arguments:
+	command: Command to execute, without the forward slash "/".
+
+Evaluates to: Nothing.
+
+Example: (xchat:command "server irc.openprojects.net")
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:find-context
+
+Prototype: (xchat:find-context server channel)
+
+Description: Finds a context based on a channel and server. If server is #f, it 
+	     finds any channel (or query) by the given name. If channel is #f, 
+	     it finds the front-most tab/window of the given servername. If #f
+	     is given for both arguments, the currently focused tab/window will
+	     be returned.
+
+Arguments:
+	server: Servername or #f.
+	channel: Channelname or #f. 
+
+Evaluates to: A Context object of type xchat_context_t or #f.
+
+Example: (xchat:find-context #f "#guile")
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:current-context
+
+Prototype: (xchat:current-context)
+
+Description: Returns the current context for your plugin. You can use this later
+	     with xchat:set-context.
+
+Evaluates to: A Context object of type xchat_context_t or #f.
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:set-context
+
+Prototype: (xchat:set-context context)
+
+Description: Changes your current context to the one given.
+
+Arguments:
+	context: Context to change to (obtained with xchat:get-context or 
+		 xchat:find-context)
+
+Evaluates to: #t on success, #f on failure.
+
+Example: (xchat:set-context 
+	    (xchat:find-context "irc.freenode.net" "#gstreamer"))
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:nick-compare
+
+Prototype: (xchat:nick-compare nick1 nick2)
+
+Description: Performs a nick name comparison, based on the current server
+	     connection. This might be a RFC1459 compliant string compare, or
+	     plain ASCII (in the case of DALNet). Use this to compare channels
+	     and nicknames.
+
+Arguments:
+	nick1: String to compare.
+	nick2: String to compare nick1 to.
+
+Evaluates to: An integer less than, equal to, or greater than zero if nick1 is
+	      found, respectively, to be less than, to match, or be greater than
+	      nick2.
+
+Example: 
+	(if (equal? (xchat:nick-compare me "Zeenix") 0)
+	   (display "We are the same!"))
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:get-info
+
+Prototype: (xchat:get-info id)
+
+Description: Gets information based on your current context.
+
+Arguments:
+	id: ID of the information you want. Currently supported IDs are (case 
+	sensitive):
+
+    	away		away reason or #f if you are not away.
+	channel		current channel name.
+	charset		character-set used in the current context (since 2.4.2).
+	host		real hostname of the server you connected to.
+	inputbox	the input-box contents, what the user has typed (since 
+			2.4.1).
+	libdirfs 	library directory. e.g. /usr/lib/xchat. The same
+			directory used for auto-loading plugins (since 2.4.0).
+			This string isn't necessarily UTF-8, but local file
+			system encoding.
+	network		current network name or #f.
+	nick		your current nick name.
+	nickserv	nickserv password for this network or #f (since 2.4.3).
+	server		current server name (what the server claims to be). #f
+			if you are not connected.
+	topic		current channel topic.
+	version		xchat version number.
+	win_status	window status: "active", "hidden" or "normal" (since
+			2.0.9).
+	xchatdir	xchat config directory, e.g.: /home/user/.xchat2 This
+			string is encoded in UTF-8.
+	xchatdirfs	xchat config directory, e.g.: /home/user/.xchat2 (since 
+			2.0.9).This string is encoded in local file system
+			encoding.
+
+Evaluates to: string of the requested information, or #f.
+
+Example: 
+	(if (not (xchat:get-info "server"))
+	   (xchat:print "Not connected!")) 
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:send-modes
+
+Prototype: (xchat:send-modes targets modes-per-line sign mode)
+
+Description: Sends a number of channel mode changes to the current channel. For
+	     example, you can Op a whole group of people in one go. It may send 
+	     multiple MODE lines if the request doesn't fit on one. Pass 0 for 
+	     modes-per-line to use the current server's maximum possible. This 
+	    procedure should only be called while in a channel context.
+
+Arguments:
+	targets: List of targets (strings). The names of people whom the action
+	will be performed on.
+	modes_per_line: Maximum modes to send per line.
+	sign: Mode sign, '-' or '+'.
+	mode: Mode char, e.g. 'o' for Ops.
+
+Evaluates to: Nothing.
+
+Example: (xchat:send-modes '("Alpha" "Bravo" "Charlie") 0 #\+ #\o)
+--------------------------------------------------------
+
+
+
+XChat Lists and Fields
+~~~~~~~~~~~~~
+
+Lists of information (DCCs, Channels, Userlist etc) can be retrieved with
+xchat:list-get. Please note that here 'list' doesn't imply the list 
+data-structure of scheme language, although these 'lists' are represented as
+list of lists. For more details please refer to XChat's plugin documentation,
+currently available at <http://xchat.org/docs/plugin20.html>.
+
+
+--------------------------------------------------------
+xchat:list-fields
+
+Prototype: (xchat:list-fields list-name)
+
+Description: Gets the list of fields in the given xchat information list.
+
+Arguments:
+	list-name: name of the list.
+
+Evaluates to: A list of all the fields in the given list.
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:list-get
+
+Prototype: (xchat:list-get list-name)
+
+Description: With this procedure you may retrieve a list containing the selected	     information from the current context, like a DCC list, a channel 
+	     list, a user list, etc. For more information please refer to 
+	     XChat's plugin documentation, currently available at 
+	     <http://xchat.org/docs/plugin20.html>.
+
+Arguments:
+	list-name: name of the list.
+
+Evaluates to: the requested xchat list.
+
+Example: (xchat:list-get "dcc")
+--------------------------------------------------------
+
+
+The Hook Procedures:
+~~~~~~~~~~~~~
+
+These procedures allow one to hook into XChat events.
+
+Priorities: When a priority symbol is accepted, it means that this callback may
+	    be hooked with five different priorities:
+	    
+	    'xchat-priority-highest
+	    'xchat-priority-high
+	    'xchat-priority-normal
+	    'xchat-priority-low 
+	    'xchat-priority-lowest
+	    
+	    The usage of these symbols will define the order in which your
+	    plugin will be called. Most of the time, you won't want to change
+	    its default value, 'xchat-priority-normal.
+
+Callback Evaluation symbols:
+	    A callback is supposed to evaluate to one of these 'xchat-eat-* 
+	    symbols, it is able control how XChat will proceed after the 
+	    callback finishes. These are the available symbols, and their 
+	    meanings:
+
+	    'xchat-eat-plugin: Don't let any other plugin receive this event.
+	    'xchat-eat-xchat: Don't let XChat treat this event as usual.
+	    'xchat-eat-all: Eat the event completely.
+	    'xchat-eat-none: Let everything happen as usual.
+
+word and word_eol:
+	    They are lists of strings. They contain the parameters the user
+	    entered for the particular command and are passed as arguments to
+	    the hook callbacks. For example, if you executed:
+
+	    /command NICK hi there
+
+	    (list-ref word 0) is command
+	    (list-ref word 1) is NICK
+	    (list-ref word 2) is hi
+	    (list-ref word 3) is there
+
+	    (list-ref word_eol 0) is command NICK hi there
+	    (list-ref word_eol 1) is NICK hi there
+	    (list-ref word_eol 2) is hi there
+	    (list-ref word_eol 3) is there
+
+	    Both list are limited to 31.
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:hook-command
+
+Prototype: (xchat:hook-command command-name priority callback help-text)
+
+Description: This procedure allows you to hook into the name XChat command. It means that everytime you type /name ..., callback will be called.
+
+Arguments:
+	command-name: Name of the command (without the forward slash).
+	priority:     Priority of this command.
+	callback:     Callback procedure. This will be called when the user
+		      executes the given command name.
+	help-text:    String of text to display when the user executes /help for
+		      this command.
+	
+Evaluates to: A hook handler, that can later be passed to xchat:unhook.
+Example: 
+		(xchat:hook-command 
+		    "ONOTICE" 
+		    'xchat-priority-normal
+		    (lambda (word word-eol)
+			(xchat:command 
+			    (string-append "NOTICE @" 
+			     (xchat:get-info "channel")
+			     " :" 
+			     (list-ref word-eol 1)))
+			'xchat-eat-all)
+		    "Usage: ONOTICE <message> Sends a notice to all ops")
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:hook-print
+
+Prototype: (xchat:hook-print event-name priority callback)
+
+Description: This procedure allows you to register a callback to trap any print
+	     events. The event names are available in the Edit Event Texts 
+	     window.
+
+Arguments:
+	event-name: Name of the print event (as in Edit Event Texts Window). 
+	priority:   Priority of this command.
+	callback:   Callback procedure. This will be called when this event
+		    name is printed.
+	
+Evaluates to: A hook handler, that can later be passed to xchat:unhook.
+Example:
+		(xchat:hook-print "You Part"
+		    'xchat-priority-normal
+		    (lambda (word word-eol)
+			(display "You have left channel ")
+			(display (list-ref word-eol 2))
+			(newline)
+			'xchat-eat-xchat))
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:hook-server
+
+Prototype: (xchat:hook-server server-event-name priority callback)
+
+Description: Registers a procedure to be called when a certain server event occurs. You can use this to trap PRIVMSG, NOTICE, PART, a server numeric etc... If you want to hook every line that comes from the IRC server, you may use the special name of "RAW LINE".
+
+Arguments:
+	server-event-name:  Name of the server event.
+	priority: 	    Priority of this command.
+	callback:	    Callback procedure. This will be called when this 
+			    event is received from the server.
+	
+Evaluates to: A hook handler, that can later be passed to xchat:unhook.
+Example: 
+	(xchat:hook-server "Part" 
+			   'xchat-priority-normal
+			   (lambda (word word-eol) 
+				(display (list-ref word 0))
+				(display " has left channel ")
+				(display (list-ref word 2))
+				(newline)
+				'xchat-eat-xchat))
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:hook-timer
+
+Prototype: (xchat:hook-timer timeout callback)
+
+Description: Registers a procedure to be called every "timeout" milliseconds. 
+
+Arguments:
+	timeout:    Timeout in milliseconds (1000 is 1 second).
+	callback:   Callback procedure. This will be called every "timeout"
+		    milliseconds.
+	
+Evaluates to: A hook handler, that can later be passed to xchat:unhook.
+
+Example:
+
+	; This example deliberately makes use of closures to demonstrate why
+	; this procedure does not need a 'user-data' argument in scheme as
+	; needed in other languages
+
+	(xchat:hook-timer 1000 
+			  (let ((clock 0))
+			    (lambda ()
+				(set! clock (+ clock 1))
+				(display "seconds passed = ")
+				(display clock)
+				(newline)))))
+--------------------------------------------------------
+
+--------------------------------------------------------
+xchat:unhook
+
+Prototype: (xchat:unhook hook-handler)
+
+Description: Unhooks any hook registered with
+	     xchat:hook-print/server/timer/command. When plugins are unloaded,
+	     its hooks are NOT automatically removed (yet), so you need to call
+	     this within your xchat:plugin-deinit procedure for each of the
+	     hooks you registered. Failure in compliance to this rule will not
+	     result in any earth-quack or even a segfault so don't worry too 
+	     much about it. :)
+
+Arguments:
+	hook-handler: The hook handler, as returned by xchat:hook-*.
+	
+Evaluates to: The callback procedure given upon the registration of the hook.
+
+Example: (xchat:unhook hook-handler)
+
+--------------------------------------------------------
+
