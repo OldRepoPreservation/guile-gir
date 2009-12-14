@@ -11,4 +11,4 @@ MAINTAINERCLEANFILES = aclocal.m4 \
 		       missing \
 		       config.h.in
 
-SUBDIRS = gir
+SUBDIRS = gir tests

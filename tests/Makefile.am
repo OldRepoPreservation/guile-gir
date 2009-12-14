@@ -1,0 +1,3 @@
+EXTRA_DIST = call.scm
+
+MAINTAINERCLEANFILES = Makefile.in
