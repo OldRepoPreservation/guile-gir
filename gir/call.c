@@ -114,6 +114,43 @@ gi_arg_to_scm (GITypeInfo *arg_type,
                GArgument   arg)
 {
         switch (g_type_info_get_tag (arg_type)) {
+                case GI_TYPE_TAG_BOOLEAN:
+                        return scm_from_bool (arg.v_boolean);
+                case GI_TYPE_TAG_INT8:
+                        return scm_from_int8 (arg.v_int8);
+                case GI_TYPE_TAG_UINT8:
+                        return scm_from_uint8 (arg.v_uint8);
+                case GI_TYPE_TAG_INT16:
+                        return scm_from_int16 (arg.v_int16);
+                case GI_TYPE_TAG_UINT16:
+                        return scm_from_uint16 (arg.v_uint16);
+                case GI_TYPE_TAG_INT32:
+                        return scm_from_int32 (arg.v_int32);
+                case GI_TYPE_TAG_UINT32:
+                        return scm_from_uint32 (arg.v_uint32);
+                case GI_TYPE_TAG_INT64:
+                        return scm_from_int64 (arg.v_int64);
+                case GI_TYPE_TAG_UINT64:
+                        return scm_from_uint64 (arg.v_uint64);
+                case GI_TYPE_TAG_INT:
+                        return scm_from_int (arg.v_int);
+                case GI_TYPE_TAG_UINT:
+                        return scm_from_uint (arg.v_uint);
+                case GI_TYPE_TAG_LONG:
+                case GI_TYPE_TAG_TIME_T:
+                        return scm_from_long (arg.v_long);
+                case GI_TYPE_TAG_ULONG:
+                        return scm_from_ulong (arg.v_ulong);
+                case GI_TYPE_TAG_SSIZE:
+                        return scm_from_ssize_t (arg.v_ssize);
+                case GI_TYPE_TAG_SIZE:
+                case GI_TYPE_TAG_GTYPE:
+                        return scm_from_size_t (arg.v_size);
+                case GI_TYPE_TAG_FLOAT:
+                        return scm_from_double (arg.v_float);
+                case GI_TYPE_TAG_DOUBLE:
+                        return scm_from_double (arg.v_double);
+                case GI_TYPE_TAG_FILENAME:
                 case GI_TYPE_TAG_UTF8:
                         return scm_from_locale_string (arg.v_string);
                 default:
@@ -127,7 +164,61 @@ scm_to_gi_arg (SCM         scm_arg,
                GArgument  *arg)
 {
         switch (g_type_info_get_tag (arg_type)) {
+                case GI_TYPE_TAG_BOOLEAN:
+                        arg->v_boolean = scm_to_bool (scm_arg);
+                        break;
+                case GI_TYPE_TAG_INT8:
+                        arg->v_int8 = scm_to_int8 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_UINT8:
+                        arg->v_uint8 = scm_to_uint8 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_INT16:
+                        arg->v_int16 = scm_to_int16 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_UINT16:
+                        arg->v_uint16 = scm_to_uint16 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_INT32:
+                        arg->v_int = scm_to_int32 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_UINT32:
+                        arg->v_int = scm_to_int32 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_INT64:
+                        arg->v_int64 = scm_to_int64 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_UINT64:
+                        arg->v_uint64 = scm_to_uint64 (scm_arg);
+                        break;
+                case GI_TYPE_TAG_INT:
+                        arg->v_int = scm_to_int (scm_arg);
+                        break;
+                case GI_TYPE_TAG_UINT:
+                        arg->v_uint = scm_to_uint (scm_arg);
+                        break;
+                case GI_TYPE_TAG_TIME_T:
+                case GI_TYPE_TAG_LONG:
+                        arg->v_long = scm_to_long (scm_arg);
+                        break;
+                case GI_TYPE_TAG_ULONG:
+                        arg->v_ulong = scm_to_ulong (scm_arg);
+                        break;
+                case GI_TYPE_TAG_SSIZE:
+                        arg->v_size = scm_to_size_t (scm_arg);
+                        break;
+                case GI_TYPE_TAG_SIZE:
+                case GI_TYPE_TAG_GTYPE:
+                        arg->v_ssize = scm_to_ssize_t (scm_arg);
+                        break;
+                case GI_TYPE_TAG_FLOAT:
+                        arg->v_float = scm_to_double (scm_arg);
+                        break;
+                case GI_TYPE_TAG_DOUBLE:
+                        arg->v_double = scm_to_double (scm_arg);
+                        break;
                 case GI_TYPE_TAG_UTF8:
+                case GI_TYPE_TAG_FILENAME:
                         arg->v_string = scm_to_locale_string (scm_arg);
                         break;
                 default:
