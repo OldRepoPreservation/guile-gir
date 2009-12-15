@@ -49,11 +49,10 @@ scm_g_irepository_require (SCM scm_repository,
 
         repo = (GIRepository *) SCM_SMOB_DATA (scm_repository);
 
-        if (SCM_UNBNDP (scm_version)) {
+        if (SCM_UNBNDP (scm_version))
                 version = NULL;
-        } else {
+        else
                 version = scm_to_locale_string (scm_version);
-        }
 
         error = NULL;
         typelib = g_irepository_require (repo,
