@@ -30,6 +30,8 @@ AC_SUBST(GUILE_LIBS)
 AC_SUBST(GUILE_CFLAGS)
 
 dnl Done.
-AC_CONFIG_FILES([Makefile gir/Makefile])
+AC_CONFIG_FILES([Makefile
+                 gir/Makefile
+                 tests/Makefile])
 AC_OUTPUT
 
