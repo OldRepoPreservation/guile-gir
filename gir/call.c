@@ -37,49 +37,45 @@ scm_to_gi_arg (SCM         scm_arg,
                GITypeInfo *arg_type,
                GArgument  *arg);
 
+static GArgument *
+construct_in_args (GICallableInfo *callable_info,
+                   SCM             scm_in_args,
+                   int            *n_in_args);
+
+static GArgument *
+construct_out_args (GICallableInfo *callable_info,
+                    int            *n_out_args,
+                    int           **out_arg_indices);
+
+static SCM
+construct_return_value (GICallableInfo *callable_info,
+                        GArgument       return_value,
+                        GArgument      *out_args,
+                        int             n_out_args,
+                        int            *out_arg_indices);
+
 static SCM
 scm_g_function_info_invoke (SCM scm_info,
-                            SCM scm_in_args,
-                            SCM scm_out_args)
+                            SCM scm_in_args)
 {
         GIFunctionInfo *info;
+        GICallableInfo *callable_info;
         int n_in_args;
         int n_out_args;
+        int *out_arg_indices;
+        int n_args;
         GArgument *in_args;
         GArgument *out_args;
         GArgument return_value;
-        SCM scm_return_value;
         GError *error;
 
         info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_info);
+        callable_info = (GICallableInfo *) info;
 
-        n_in_args = scm_ilength (scm_in_args);
-        if (n_in_args > 0) {
-                int i;
-
-                in_args = g_malloc (sizeof (GArgument) * n_in_args);
-
-                for (i = 0; i < n_in_args; i++) {
-                        SCM arg;
-                        GITypeInfo *type;
-
-                        arg = scm_list_ref (scm_in_args, scm_from_int (i));
-                        type = g_arg_info_get_type (g_callable_info_get_arg (
-                                        (GICallableInfo *) info,
-                                         i));
-
-                        scm_to_gi_arg (arg, type, &in_args[i]);
-                }
-        } else {
-                in_args = NULL;
-        }
-
-        n_out_args = scm_ilength (scm_out_args);
-        if (n_out_args > 0) {
-                out_args = g_malloc (sizeof (GArgument) * n_out_args);
-        } else {
-                out_args = NULL;
-        }
+        in_args = construct_in_args (callable_info, scm_in_args, &n_in_args);
+        out_args = construct_out_args (callable_info,
+                                       &n_out_args,
+                                       &out_arg_indices);
 
         error = NULL;
         g_function_info_invoke (info,
@@ -95,10 +91,11 @@ scm_g_function_info_invoke (SCM scm_info,
                 return SCM_UNSPECIFIED;
         }
 
-        scm_return_value = gi_return_value_to_scm ((GICallableInfo *) info,
-                                                   return_value);
-
-        return scm_return_value;
+        return construct_return_value (callable_info,
+                                       return_value,
+                                       out_args,
+                                       n_out_args,
+                                       out_arg_indices);
 }
 
 static SCM
@@ -138,6 +135,129 @@ scm_to_gi_arg (SCM         scm_arg,
         }
 }
 
+static GArgument *
+construct_in_args (GICallableInfo *callable_info,
+                   SCM             scm_in_args,
+                   int            *n_in_args)
+{
+        GArgument *in_args;
+        int n_args;
+        int i;
+
+        in_args = NULL;
+        *n_in_args = 0;
+        n_args = g_callable_info_get_n_args (callable_info);
+
+        if (n_args < 0)
+                return NULL;
+
+        /* FIXME: We are allocating array for all arguments although it only
+         *        needs to be big enough to fit 'in' arguments.
+         */
+        in_args = g_malloc0 (sizeof (GArgument) * n_args);
+
+        for (i = 0; i < n_args; i++) {
+                GIArgInfo *arg_info;
+                GIDirection direction;
+                GITypeInfo *type;
+                SCM arg;
+
+                arg_info = g_callable_info_get_arg (callable_info, i);
+                direction = g_arg_info_get_direction (arg_info);
+                if (direction != GI_DIRECTION_IN &&
+                    direction != GI_DIRECTION_INOUT)
+                        continue;
+
+                type = g_arg_info_get_type (arg_info);
+
+                arg = scm_list_ref (scm_in_args, scm_from_int (*n_in_args));
+                scm_to_gi_arg (arg, type, &in_args[*n_in_args]);
+
+                (*n_in_args)++;
+        }
+
+        return in_args;
+}
+
+static GArgument *
+construct_out_args (GICallableInfo *callable_info,
+                    int            *n_out_args,
+                    int           **out_arg_indices)
+{
+        GArgument *out_args;
+        int n_args;
+        int i;
+
+        out_args = NULL;
+        *n_out_args = 0;
+        n_args = g_callable_info_get_n_args (callable_info);
+
+        if (n_args < 0)
+                return NULL;
+
+        /* FIXME: We are allocating array for all arguments although it only
+         *        needs to be big enough to fit 'out' arguments.
+         */
+        out_args = g_malloc0 (sizeof (GArgument) * n_args);
+        *out_arg_indices = g_malloc (sizeof (int) * n_args);
+
+        for (i = 0; i < n_args; i++) {
+                GIArgInfo *arg_info;
+                GIDirection direction;
+
+                arg_info = g_callable_info_get_arg (callable_info, i);
+                direction = g_arg_info_get_direction (arg_info);
+                if (direction != GI_DIRECTION_OUT &&
+                    direction != GI_DIRECTION_INOUT)
+                        continue;
+
+                (*out_arg_indices)[*n_out_args] = i;
+
+                (*n_out_args)++;
+        }
+
+        return out_args;
+}
+
+static SCM
+construct_return_value (GICallableInfo *callable_info,
+                        GArgument       return_value,
+                        GArgument      *out_args,
+                        int             n_out_args,
+                        int            *out_arg_indices)
+{
+        SCM scm_return;
+        SCM scm_return_value;
+
+        scm_return = SCM_EOL;
+        scm_return_value = gi_return_value_to_scm (callable_info, return_value);
+        if (scm_return_value != SCM_UNSPECIFIED)
+                scm_return = scm_cons (scm_return_value, scm_return);
+
+        if (n_out_args > 0) {
+                int i;
+
+                for (i = 0; i < n_out_args; i++) {
+                        GIArgInfo *arg_info;
+                        GITypeInfo *type;
+                        SCM arg;
+
+                        arg_info = g_callable_info_get_arg (callable_info,
+                                                            out_arg_indices[i]);
+                        type = g_arg_info_get_type (arg_info);
+                        arg = gi_arg_to_scm (type, out_args[i]);
+
+                        if (scm_return_value != SCM_UNSPECIFIED)
+                                scm_return = scm_cons (arg, scm_return);
+                }
+        }
+
+        if (scm_return != SCM_EOL)
+                return scm_values (scm_reverse (scm_return));
+        else
+                return SCM_UNSPECIFIED;
+}
+
 void
 call_init ()
 {
@@ -145,7 +265,7 @@ call_init ()
 
         g_i_function_info_t = scm_make_smob_type ("g-i-function-info", 0);
         scm_c_define_gsubr ("g-function-info-invoke",
-                            3,
+                            2,
                             0,
                             0,
                             scm_g_function_info_invoke);

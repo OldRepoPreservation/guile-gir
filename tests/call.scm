@@ -27,10 +27,9 @@
 ;; $ guile -s call.scm GLib filename_to_uri /home/zeenix localhost
 ;;
 
-(define (call repo namespace func in out)
+(define (call repo namespace func args)
     (g-function-info-invoke (g-irepository-find-by-name repo namespace func)
-                            in
-                            out))
+                            args))
 
 (use-modules (gir))
 (let ((repo (g-irepository-get-default))
@@ -39,5 +38,4 @@
      (display (call repo
                     namespace
                     (list-ref (command-line) 2)
-                    (list-tail (command-line) 3)
-                    '())))
+                    (list-tail (command-line) 3))))
