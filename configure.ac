@@ -29,6 +29,11 @@ PKG_CHECK_MODULES(GUILE, guile-1.8 >= 1.8.5)
 AC_SUBST(GUILE_LIBS)
 AC_SUBST(GUILE_CFLAGS)
 
+dnl Check for Guile-GNOME's GLib
+PKG_CHECK_MODULES(GUILE_GLIB, guile-gnome-glib-2 >= 2.16.1)
+AC_SUBST(GUILE_GLIB_LIBS)
+AC_SUBST(GUILE_GLIB_CFLAGS)
+
 dnl Done.
 AC_CONFIG_FILES([Makefile
                  gir/Makefile
