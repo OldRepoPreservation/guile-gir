@@ -28,19 +28,15 @@
 ;;
 
 (define (call repo namespace func args)
-    (call-with-values (lambda ()
-                              (g-function-info-invoke
-                                        (g-irepository-find-by-name repo
-                                                                    namespace
-                                                                    func)
-                                        args))
+    (call-with-values (lambda () (g-function-info-invoke func args))
                        list))
 
 (use-modules (gir))
 (let ((repo (g-irepository-get-default))
       (namespace (list-ref (command-line) 1)))
      (g-irepository-require repo namespace)
-     (display (call repo
-                    namespace
-                    (list-ref (command-line) 2)
-                    (list-tail (command-line) 3))))
+     (let ((func (g-irepository-find-by-name repo
+                                             namespace
+                                             (list-ref (command-line) 2)))
+           (args (list-tail (command-line) 3)))
+           (display (call repo namespace func args))))
