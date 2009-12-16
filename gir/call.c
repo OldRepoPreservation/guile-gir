@@ -462,17 +462,21 @@ construct_return_value (GICallableInfo *callable_info,
                         GIArgInfo *arg_info;
                         GITypeInfo *type;
                         GITransfer transfer_type;
-                        SCM arg;
+                        GArgument *argument;
+                        SCM scm_arg;
 
                         arg_info = g_callable_info_get_arg (callable_info,
                                                             out_arg_indices[i]);
                         type = g_arg_info_get_type (arg_info);
                         transfer_type = g_arg_info_get_ownership_transfer
                                                                 (arg_info);
-                        arg = gi_arg_to_scm (type, transfer_type, out_args[i]);
+                        argument = (GArgument *) out_args[i].v_pointer;
+                        scm_arg = gi_arg_to_scm (type,
+                                                 transfer_type,
+                                                 *argument);
 
-                        if (scm_return_value != SCM_UNSPECIFIED)
-                                scm_return = scm_cons (arg, scm_return);
+                        if (scm_arg != SCM_UNSPECIFIED)
+                                scm_return = scm_cons (scm_arg, scm_return);
                 }
         }
 
