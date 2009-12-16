@@ -55,6 +55,7 @@ construct_in_args (GICallableInfo *callable_info,
 
 static GArgument *
 construct_out_args (GICallableInfo *callable_info,
+                    GArgument     **real_out_args,
                     int            *n_out_args,
                     int           **out_arg_indices);
 
@@ -77,6 +78,7 @@ scm_g_function_info_invoke (SCM scm_info,
         int n_args;
         GArgument *in_args;
         GArgument *out_args;
+        GArgument *real_out_args;
         GArgument return_value;
         GError *error;
         SCM scm_return;
@@ -86,6 +88,7 @@ scm_g_function_info_invoke (SCM scm_info,
 
         in_args = construct_in_args (callable_info, scm_in_args, &n_in_args);
         out_args = construct_out_args (callable_info,
+                                       &real_out_args,
                                        &n_out_args,
                                        &out_arg_indices);
 
@@ -112,6 +115,7 @@ scm_g_function_info_invoke (SCM scm_info,
         g_free (in_args);
         g_free (out_args);
         g_free (out_arg_indices);
+        g_free (real_out_args);
 
         return scm_return;
 }
@@ -394,6 +398,7 @@ construct_in_args (GICallableInfo *callable_info,
 
 static GArgument *
 construct_out_args (GICallableInfo *callable_info,
+                    GArgument     **real_out_args,
                     int            *n_out_args,
                     int           **out_arg_indices)
 {
@@ -412,6 +417,7 @@ construct_out_args (GICallableInfo *callable_info,
          *        needs to be big enough to fit 'out' arguments.
          */
         out_args = g_malloc0 (sizeof (GArgument) * n_args);
+        *real_out_args = g_malloc0 (sizeof (GArgument) * n_args);
         *out_arg_indices = g_malloc (sizeof (int) * n_args);
 
         for (i = 0; i < n_args; i++) {
@@ -424,6 +430,8 @@ construct_out_args (GICallableInfo *callable_info,
                     direction != GI_DIRECTION_INOUT)
                         continue;
 
+                out_args[*n_out_args].v_pointer =
+                                        &(*real_out_args)[*n_out_args];
                 (*out_arg_indices)[*n_out_args] = i;
 
                 (*n_out_args)++;
