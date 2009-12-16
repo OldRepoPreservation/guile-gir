@@ -27,11 +27,19 @@
     (let ((func (g-irepository-find-by-name repo namespace "test_utf8_out")))
         (display (call repo namespace func '()))))
 
+(define (test-simple-boxed-a-const-return repo namespace)
+    (let ((func (g-irepository-find-by-name
+                                        repo
+                                        namespace
+                                        "test_simple_boxed_a_const_return")))
+        (display (call repo namespace func '()))))
+
 (use-modules (gir))
 (let ((repo (g-irepository-get-default))
       (namespace "Everything"))
      (g-irepository-require repo namespace)
 
      ; Now we test each toplevel static function
-     (test-utf8-out repo namespace))
+     (test-utf8-out repo namespace)
+     (test-simple-boxed-a-const-return repo namespace))
 
