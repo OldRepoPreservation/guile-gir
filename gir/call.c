@@ -31,10 +31,12 @@ gi_return_value_to_scm (GICallableInfo *info,
                         GArgument       return_value);
 static SCM
 gi_arg_to_scm (GITypeInfo *arg_type,
+               GITransfer  transfer_type,
                GArgument   arg);
 static void
 scm_to_gi_arg (SCM         scm_arg,
                GITypeInfo *arg_type,
+               GITransfer  transfer_type,
                GArgument  *arg);
 
 static GArgument *
@@ -103,14 +105,17 @@ gi_return_value_to_scm (GICallableInfo *info,
                         GArgument       return_value)
 {
         GITypeInfo *return_type;
+        GITransfer  transfer_type;
 
         return_type = g_callable_info_get_return_type (info);
+        transfer_type = g_callable_info_get_caller_owns (info);
 
-        return gi_arg_to_scm (return_type, return_value);
+        return gi_arg_to_scm (return_type, transfer_type, return_value);
 }
 
 static SCM
 gi_arg_to_scm (GITypeInfo *arg_type,
+               GITransfer  transfer_type,
                GArgument   arg)
 {
         switch (g_type_info_get_tag (arg_type)) {
@@ -161,6 +166,7 @@ gi_arg_to_scm (GITypeInfo *arg_type,
 static void
 scm_to_gi_arg (SCM         scm_arg,
                GITypeInfo *arg_type,
+               GITransfer  transfer_type,
                GArgument  *arg)
 {
         switch (g_type_info_get_tag (arg_type)) {
@@ -250,6 +256,7 @@ construct_in_args (GICallableInfo *callable_info,
         for (i = 0; i < n_args; i++) {
                 GIArgInfo *arg_info;
                 GIDirection direction;
+                GITransfer transfer_type;
                 GITypeInfo *type;
                 SCM arg;
 
@@ -260,9 +267,10 @@ construct_in_args (GICallableInfo *callable_info,
                         continue;
 
                 type = g_arg_info_get_type (arg_info);
+                transfer_type = g_arg_info_get_ownership_transfer (arg_info);
 
                 arg = scm_list_ref (scm_in_args, scm_from_int (*n_in_args));
-                scm_to_gi_arg (arg, type, &in_args[*n_in_args]);
+                scm_to_gi_arg (arg, type, transfer_type, &in_args[*n_in_args]);
 
                 (*n_in_args)++;
         }
@@ -331,12 +339,15 @@ construct_return_value (GICallableInfo *callable_info,
                 for (i = 0; i < n_out_args; i++) {
                         GIArgInfo *arg_info;
                         GITypeInfo *type;
+                        GITransfer transfer_type;
                         SCM arg;
 
                         arg_info = g_callable_info_get_arg (callable_info,
                                                             out_arg_indices[i]);
                         type = g_arg_info_get_type (arg_info);
-                        arg = gi_arg_to_scm (type, out_args[i]);
+                        transfer_type = g_arg_info_get_ownership_transfer
+                                                                (arg_info);
+                        arg = gi_arg_to_scm (type, transfer_type, out_args[i]);
 
                         if (scm_return_value != SCM_UNSPECIFIED)
                                 scm_return = scm_cons (arg, scm_return);
