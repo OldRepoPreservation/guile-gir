@@ -30,6 +30,7 @@ void
 init ()
 {
         g_type_init ();
+        scm_c_eval_string ("(use-modules (gnome-2) (gnome gobject))");
 
         repository_init ();
         types_init ();
