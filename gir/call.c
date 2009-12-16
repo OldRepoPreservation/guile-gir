@@ -79,6 +79,7 @@ scm_g_function_info_invoke (SCM scm_info,
         GArgument *out_args;
         GArgument return_value;
         GError *error;
+        SCM scm_return;
 
         info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_info);
         callable_info = (GICallableInfo *) info;
@@ -102,11 +103,17 @@ scm_g_function_info_invoke (SCM scm_info,
                 return SCM_UNSPECIFIED;
         }
 
-        return construct_return_value (callable_info,
-                                       return_value,
-                                       out_args,
-                                       n_out_args,
-                                       out_arg_indices);
+        scm_return = construct_return_value (callable_info,
+                                             return_value,
+                                             out_args,
+                                             n_out_args,
+                                             out_arg_indices);
+
+        g_free (in_args);
+        g_free (out_args);
+        g_free (out_arg_indices);
+
+        return scm_return;
 }
 
 static SCM
