@@ -19,6 +19,7 @@
  */
 
 #include "call.h"
+#include <guile-gnome-gobject.h>
 
 /* SMOB types for Function call-related types */
 scm_t_bits callable_info_t;
@@ -38,7 +39,15 @@ scm_to_gi_arg (SCM         scm_arg,
                GITypeInfo *arg_type,
                GITransfer  transfer_type,
                GArgument  *arg);
-
+static SCM
+gi_interface_to_scm (GITypeInfo *arg_type,
+                     GITransfer  transfer_type,
+                     GArgument   arg);
+static void
+scm_to_gi_interface (SCM         scm_arg,
+                     GITypeInfo *arg_type,
+                     GITransfer  transfer_type,
+                     GArgument  *arg);
 static GArgument *
 construct_in_args (GICallableInfo *callable_info,
                    SCM             scm_in_args,
@@ -158,9 +167,59 @@ gi_arg_to_scm (GITypeInfo *arg_type,
                 case GI_TYPE_TAG_FILENAME:
                 case GI_TYPE_TAG_UTF8:
                         return scm_from_locale_string (arg.v_string);
+                case GI_TYPE_TAG_INTERFACE:
+                        return gi_interface_to_scm (arg_type,
+                                                    transfer_type,
+                                                    arg);
                 default:
                         return SCM_UNSPECIFIED;
         }
+}
+
+static SCM
+gi_interface_to_scm (GITypeInfo *arg_type,
+                     GITransfer  transfer_type,
+                     GArgument   arg)
+{
+        GIBaseInfo *base_info;
+        gpointer c_instance;
+        SCM scm_instance;
+
+        base_info = g_type_info_get_interface (arg_type);
+        c_instance = arg.v_pointer;
+
+        switch (g_base_info_get_type (base_info)) {
+                case GI_INFO_TYPE_OBJECT:
+                case GI_INFO_TYPE_INTERFACE:
+                        scm_instance = scm_c_gtype_instance_to_scm (c_instance);
+                        if (transfer_type == GI_TRANSFER_EVERYTHING)
+                                scm_c_gtype_instance_unref (c_instance);
+
+                        break;
+                case GI_INFO_TYPE_BOXED:
+                {
+                        GIRegisteredTypeInfo *reg_type;
+                        GType gtype;
+
+                        reg_type = (GIRegisteredTypeInfo *) arg_type;
+                        gtype = g_registered_type_info_get_g_type (reg_type);
+
+                        if (transfer_type == GI_TRANSFER_EVERYTHING)
+                                scm_instance = scm_c_gvalue_new_take_boxed
+                                                                (gtype,
+                                                                 c_instance);
+                        else
+                                scm_instance = scm_c_gvalue_new_from_boxed
+                                                                (gtype,
+                                                                 c_instance);
+
+                        break;
+                }
+                default:
+                        scm_instance = SCM_UNSPECIFIED;
+        }
+
+        return scm_instance;
 }
 
 static void
@@ -227,6 +286,54 @@ scm_to_gi_arg (SCM         scm_arg,
                 case GI_TYPE_TAG_FILENAME:
                         arg->v_string = scm_to_locale_string (scm_arg);
                         break;
+                case GI_TYPE_TAG_INTERFACE:
+                        scm_to_gi_interface (scm_arg,
+                                             arg_type,
+                                             transfer_type,
+                                             arg);
+                        break;
+                default:
+                        break;
+        }
+}
+
+static void
+scm_to_gi_interface (SCM         scm_arg,
+                     GITypeInfo *arg_type,
+                     GITransfer  transfer_type,
+                     GArgument  *arg)
+{
+        GIBaseInfo *base_info;
+        gpointer *c_instance;
+        SCM scm_instance;
+
+        base_info = g_type_info_get_interface (arg_type);
+        *c_instance = &(arg->v_pointer);
+
+        switch (g_base_info_get_type (base_info)) {
+                case GI_INFO_TYPE_OBJECT:
+                case GI_INFO_TYPE_INTERFACE:
+                        if (transfer_type == GI_TRANSFER_EVERYTHING)
+                                scm_c_gtype_instance_ref (*c_instance);
+
+                        *c_instance = scm_c_scm_to_gtype_instance (scm_arg);
+
+                        break;
+                case GI_INFO_TYPE_BOXED:
+                {
+                        GIRegisteredTypeInfo *reg_type;
+                        GType gtype;
+
+                        reg_type = (GIRegisteredTypeInfo *) arg_type;
+                        gtype = g_registered_type_info_get_g_type (reg_type);
+
+                        if (transfer_type == GI_TRANSFER_EVERYTHING)
+                                *c_instance = scm_c_gvalue_dup_boxed (scm_arg);
+                        else
+                                *c_instance = scm_c_gvalue_peek_boxed (scm_arg);
+
+                        break;
+                }
                 default:
                         break;
         }
