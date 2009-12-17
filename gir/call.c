@@ -23,7 +23,7 @@
 
 /* SMOB types for Function call-related types */
 scm_t_bits callable_info_t;
-scm_t_bits g_i_function_info_t;
+scm_t_bits function_info_t;
 scm_t_bits callback_info_t;
 scm_t_bits arg_info_t;
 
@@ -491,7 +491,7 @@ call_init ()
 {
         callable_info_t = scm_make_smob_type ("g-i-callable-info", 0);
 
-        g_i_function_info_t = scm_make_smob_type ("g-i-function-info", 0);
+        function_info_t = scm_make_smob_type ("g-i-function-info", 0);
         scm_c_define_gsubr ("g-function-info-invoke",
                             2,
                             0,

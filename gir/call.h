@@ -26,7 +26,7 @@
 #include <girepository.h>
 
 extern scm_t_bits callable_info_t;
-extern scm_t_bits g_i_function_info_t;
+extern scm_t_bits function_info_t;
 extern scm_t_bits callback_info_t;
 extern scm_t_bits arg_info_t;
 
