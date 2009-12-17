@@ -56,16 +56,8 @@ scm_g_callable_info_get_caller_owns (SCM scm_callable_info)
         GICallableInfo *callable_info;
 
         callable_info = (GICallableInfo *) SCM_SMOB_DATA (scm_callable_info);
-        switch (g_callable_info_get_caller_owns (callable_info)) {
-                case GI_TRANSFER_NOTHING:
-                        return scm_str2symbol (TRANSFER_NOTHING_SYMBOL);
-                case GI_TRANSFER_CONTAINER:
-                        return scm_str2symbol (TRANSFER_CONTAINER_SYMBOL);
-                case GI_TRANSFER_EVERYTHING:
-                        return scm_str2symbol (TRANSFER_EVERYTHING_SYMBOL);
-                default:
-                        g_assert_not_reached ();
-        }
+
+        scm_from_int (g_callable_info_get_caller_owns (callable_info));
 }
 
 static SCM
@@ -139,4 +131,11 @@ callable_init (void)
                             0,
                             0,
                             scm_g_callable_info_get_arg);
+
+        scm_c_define (TRANSFER_NOTHING_SYMBOL,
+                      scm_from_int (GI_TRANSFER_NOTHING));
+        scm_c_define (TRANSFER_CONTAINER_SYMBOL,
+                      scm_from_int (GI_TRANSFER_CONTAINER));
+        scm_c_define (TRANSFER_EVERYTHING_SYMBOL,
+                      scm_from_int (GI_TRANSFER_EVERYTHING));
 }
