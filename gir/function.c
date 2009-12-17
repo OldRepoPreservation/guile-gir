@@ -455,7 +455,6 @@ scm_g_function_info_invoke (SCM scm_info,
                                        &real_out_args,
                                        &n_out_args,
                                        &out_arg_indices);
-        g_print ("we have %d out args %p\n", n_out_args, out_args);
 
         error = NULL;
         g_function_info_invoke (info,
