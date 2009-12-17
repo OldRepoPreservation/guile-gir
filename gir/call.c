@@ -67,60 +67,6 @@ construct_return_value (GICallableInfo *callable_info,
                         int            *out_arg_indices);
 
 static SCM
-scm_g_function_info_invoke (SCM scm_info,
-                            SCM scm_in_args)
-{
-        GIFunctionInfo *info;
-        GICallableInfo *callable_info;
-        int n_in_args;
-        int n_out_args;
-        int *out_arg_indices;
-        int n_args;
-        GArgument *in_args;
-        GArgument *out_args;
-        GArgument *real_out_args;
-        GArgument return_value;
-        GError *error;
-        SCM scm_return;
-
-        info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_info);
-        callable_info = (GICallableInfo *) info;
-
-        in_args = construct_in_args (callable_info, scm_in_args, &n_in_args);
-        out_args = construct_out_args (callable_info,
-                                       &real_out_args,
-                                       &n_out_args,
-                                       &out_arg_indices);
-
-        error = NULL;
-        g_function_info_invoke (info,
-                                in_args,
-                                n_in_args,
-                                out_args,
-                                n_out_args,
-                                &return_value,
-                                &error);
-        if (error) {
-                /* FIXME: Throw Guile error here */
-                g_critical ("Failed to load typelib: %s", error->message);
-                return SCM_UNSPECIFIED;
-        }
-
-        scm_return = construct_return_value (callable_info,
-                                             return_value,
-                                             out_args,
-                                             n_out_args,
-                                             out_arg_indices);
-
-        g_free (in_args);
-        g_free (out_args);
-        g_free (out_arg_indices);
-        g_free (real_out_args);
-
-        return scm_return;
-}
-
-static SCM
 gi_return_value_to_scm (GICallableInfo *info,
                         GArgument       return_value)
 {
@@ -484,6 +430,61 @@ construct_return_value (GICallableInfo *callable_info,
                 return scm_values (scm_reverse (scm_return));
         else
                 return SCM_UNSPECIFIED;
+}
+
+static SCM
+scm_g_function_info_invoke (SCM scm_info,
+                            SCM scm_in_args)
+{
+        GIFunctionInfo *info;
+        GICallableInfo *callable_info;
+        int n_in_args;
+        int n_out_args;
+        int *out_arg_indices;
+        int n_args;
+        GArgument *in_args;
+        GArgument *out_args;
+        GArgument *real_out_args;
+        GArgument return_value;
+        GError *error;
+        SCM scm_return;
+
+        info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_info);
+        callable_info = (GICallableInfo *) info;
+
+        in_args = construct_in_args (callable_info, scm_in_args, &n_in_args);
+        out_args = construct_out_args (callable_info,
+                                       &real_out_args,
+                                       &n_out_args,
+                                       &out_arg_indices);
+        g_print ("we have %d out args %p\n", n_out_args, out_args);
+
+        error = NULL;
+        g_function_info_invoke (info,
+                                in_args,
+                                n_in_args,
+                                out_args,
+                                n_out_args,
+                                &return_value,
+                                &error);
+        if (error) {
+                /* FIXME: Throw Guile error here */
+                g_critical ("Failed to load typelib: %s", error->message);
+                return SCM_UNSPECIFIED;
+        }
+
+        scm_return = construct_return_value (callable_info,
+                                             return_value,
+                                             out_args,
+                                             n_out_args,
+                                             out_arg_indices);
+
+        g_free (in_args);
+        g_free (out_args);
+        g_free (out_arg_indices);
+        g_free (real_out_args);
+
+        return scm_return;
 }
 
 void
