@@ -18,14 +18,12 @@
  * along with Guile-GIR.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "function.h"
 #include <guile-gnome-gobject.h>
+#include "function.h"
+#include "callable.h"
 
-/* SMOB types for FunctionInfo related types */
-scm_t_bits callable_info_t;
+/* SMOB type for GIFunctionInfo */
 scm_t_bits function_info_t;
-scm_t_bits callback_info_t;
-scm_t_bits arg_info_t;
 
 static SCM
 gi_return_value_to_scm (GICallableInfo *info,
@@ -490,15 +488,10 @@ scm_g_function_info_invoke (SCM scm_info,
 void
 function_init ()
 {
-        callable_info_t = scm_make_smob_type ("g-i-callable-info", 0);
-
         function_info_t = scm_make_smob_type ("g-i-function-info", 0);
         scm_c_define_gsubr ("g-function-info-invoke",
                             2,
                             0,
                             0,
                             scm_g_function_info_invoke);
-
-        callback_info_t = scm_make_smob_type ("g-i-callback-info", 0);
-        arg_info_t = scm_make_smob_type ("g-i-arg-info", 0);
 }
