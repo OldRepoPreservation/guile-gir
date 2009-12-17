@@ -22,6 +22,25 @@
                  g-irepository-require
                  g-irepository-find-by-name
                  g-registered-type-info-get-g-type
+                 g-object-info-get-type-name
+                 g-object-info-get-type-init
+                 g-object-info-get-abstract
+                 g-object-info-get-parent
+                 g-object-info-get-n-interfaces
+                 g-object-info-get-interface
+                 g-object-info-get-n-fields
+                 g-object-info-get-field
+                 g-object-info-get-n-properties
+                 g-object-info-get-property
+                 g-object-info-get-n-methods
+                 g-object-info-get-method
+                 g-object-info-find-method
+                 g-object-info-get-n-signals
+                 g-object-info-get-signal
+                 g-object-info-get-n-vfuncs
+                 g-object-info-get-vfunc
+                 g-object-info-get-n-constants
+                 g-object-info-get-constant
                  g-object-info-get-class-struct
                  g-function-info-invoke))
 
