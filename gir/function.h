@@ -18,8 +18,8 @@
  * along with Guile-GIR.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CALL_H__
-#define __CALL_H__
+#ifndef __FUNCTION_H__
+#define __FUNCTION_H__
 
 #include <glib.h>
 #include <libguile.h>
@@ -31,6 +31,6 @@ extern scm_t_bits callback_info_t;
 extern scm_t_bits arg_info_t;
 
 G_GNUC_INTERNAL void
-call_init                               (void);
+function_init                           (void);
 
-#endif /* __CALL_H__ */
+#endif /* __FUNCTION_H__ */

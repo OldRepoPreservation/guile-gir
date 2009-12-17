@@ -20,7 +20,7 @@
 
 #include "object.h"
 #include "types.h"
-#include "call.h"
+#include "function.h"
 
 /* SMOB types for ObjectInfo */
 scm_t_bits object_info_t;

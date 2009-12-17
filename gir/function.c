@@ -18,10 +18,10 @@
  * along with Guile-GIR.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "call.h"
+#include "function.h"
 #include <guile-gnome-gobject.h>
 
-/* SMOB types for Function call-related types */
+/* SMOB types for FunctionInfo related types */
 scm_t_bits callable_info_t;
 scm_t_bits function_info_t;
 scm_t_bits callback_info_t;
@@ -488,7 +488,7 @@ scm_g_function_info_invoke (SCM scm_info,
 }
 
 void
-call_init ()
+function_init ()
 {
         callable_info_t = scm_make_smob_type ("g-i-callable-info", 0);
 

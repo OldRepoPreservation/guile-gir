@@ -4,8 +4,8 @@ libguile_gir_1_0_la_SOURCES = gir.c \
 			      repository.h \
 			      types.c \
 			      types.h \
-			      call.c \
-			      call.h \
+			      function.c \
+			      function.h \
 			      object.c \
 			      object.h \
 			      registered-type.c \

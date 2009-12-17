@@ -26,7 +26,7 @@
 #include <types.h>
 #include <registered-type.h>
 #include <object.h>
-#include <call.h>
+#include <function.h>
 
 void 
 init ()
