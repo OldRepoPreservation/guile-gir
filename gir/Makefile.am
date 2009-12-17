@@ -7,7 +7,9 @@ libguile_gir_1_0_la_SOURCES = gir.c \
 			      call.c \
 			      call.h \
 			      object.c \
-			      object.h
+			      object.h \
+			      registered-type.c \
+			      registered-type.h
 libguile_gir_1_0_la_CFLAGS = $(GUILE_CFLAGS) $(GIR_CFLAGS) $(GUILE_GLIB_CFLAGS)
 libguile_gir_1_0_la_LIBADD = $(GUILE_LDFLAGS) $(GIR_LIBS) $(GUILE_GLIB_LIBS)
 

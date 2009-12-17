@@ -21,6 +21,7 @@
         :export (g-irepository-get-default
                  g-irepository-require
                  g-irepository-find-by-name
+                 g-registered-type-info-get-g-type
                  g-object-info-get-class-struct
                  g-function-info-invoke))
 

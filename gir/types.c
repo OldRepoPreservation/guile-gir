@@ -22,7 +22,6 @@
 
 /* SMOB types for GIRepository types */
 scm_t_bits base_info_t;
-scm_t_bits registered_type_info_t;
 scm_t_bits struct_info_t;
 scm_t_bits union_info_t;
 scm_t_bits enum_info_t;
@@ -41,8 +40,6 @@ void
 types_init (void)
 {
         base_info_t = scm_make_smob_type ("g-i-base-info", 0);
-        registered_type_info_t = scm_make_smob_type ("g-i-registered-type-info",
-                                                     0);
         struct_info_t = scm_make_smob_type ("g-i-struct-info", 0);
         union_info_t = scm_make_smob_type ("g-i-union-info", 0);
         enum_info_t = scm_make_smob_type ("g-i-enum-info", 0);

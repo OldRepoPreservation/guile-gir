@@ -24,6 +24,7 @@
 
 #include <repository.h>
 #include <types.h>
+#include <registered-type.h>
 #include <object.h>
 #include <call.h>
 
@@ -35,6 +36,7 @@ init ()
 
         repository_init ();
         types_init ();
+        registered_type_init ();
         object_init ();
         call_init ();
 }
