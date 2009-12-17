@@ -47,10 +47,20 @@
                  g-callable-info-may-return-null
                  g-callable-info-get-n-args
                  g-callable-info-get-arg
+                 g-function-info-get-symbol
+                 g-function-info-get-flags
+                 g-function-info-get-property
+                 g-function-info-get-vfunc
                  g-function-info-invoke
                  g-i-transfer-nothing
                  g-i-transfer-container
-                 g-i-transfer-everything))
+                 g-i-transfer-everything
+                 g-i-function-is-method
+                 g-i-function-is-constructor
+                 g-i-function-is-getter
+                 g-i-function-is-setter
+                 g-i-function-wraps-vfunc
+                 g-i-function-throws))
 
 (dynamic-call "init"
               (dynamic-link "libguile-gir-1.0.so"))

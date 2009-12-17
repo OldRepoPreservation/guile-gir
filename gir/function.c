@@ -21,6 +21,15 @@
 #include <guile-gnome-gobject.h>
 #include "function.h"
 #include "callable.h"
+#include "types.h"
+
+/* Symbol names for GIFunctionInfoFlags */
+#define FUNCTION_IS_METHOD      "g-i-function-is-method"
+#define FUNCTION_IS_CONSTRUCTOR "g-i-function-is-constructor"
+#define FUNCTION_IS_GETTER      "g-i-function-is-getter"
+#define FUNCTION_IS_SETTER      "g-i-function-is-setter"
+#define FUNCTION_WRAPS_VFUNC    "g-i-function-wraps-vfunc"
+#define FUNCTION_THROWS         "g-i-function-throws"
 
 /* SMOB type for GIFunctionInfo */
 scm_t_bits function_info_t;
@@ -431,6 +440,69 @@ construct_return_value (GICallableInfo *callable_info,
 }
 
 static SCM
+scm_g_function_info_get_symbol (SCM scm_function_info)
+{
+        GIFunctionInfo *function_info;
+        const gchar *symbol;
+
+        function_info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_function_info);
+        symbol = g_function_info_get_symbol (function_info);
+        if (symbol == NULL)
+                return SCM_BOOL_F;
+        else {
+                return scm_from_locale_string (symbol);
+        }
+}
+
+static SCM
+scm_g_function_info_get_flags (SCM scm_function_info)
+{
+        GIFunctionInfo *function_info;
+
+        function_info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_function_info);
+
+        return scm_from_int (g_function_info_get_flags (function_info));
+}
+
+static SCM
+scm_g_function_info_get_property (SCM scm_function_info)
+{
+        GIFunctionInfo *function_info;
+        GIPropertyInfo *property_info;
+        SCM scm_return;
+
+        function_info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_function_info);
+        property_info = g_function_info_get_property (function_info);
+        if (property_info == NULL)
+                scm_return = SCM_BOOL_F;
+        else {
+                scm_return = scm_make_smob (property_info_t);
+                SCM_SET_SMOB_DATA (scm_return, property_info);
+        }
+
+        return scm_return;
+}
+
+static SCM
+scm_g_function_info_get_vfunc (SCM scm_function_info)
+{
+        GIFunctionInfo *function_info;
+        GIVFuncInfo *vfunc_info;
+        SCM scm_return;
+
+        function_info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_function_info);
+        vfunc_info = g_function_info_get_vfunc (function_info);
+        if (vfunc_info == NULL)
+                scm_return = SCM_BOOL_F;
+        else {
+                scm_return = scm_make_smob (v_func_info_t);
+                SCM_SET_SMOB_DATA (scm_return, vfunc_info);
+        }
+
+        return scm_return;
+}
+
+static SCM
 scm_g_function_info_invoke (SCM scm_info,
                             SCM scm_in_args)
 {
@@ -488,9 +560,38 @@ void
 function_init ()
 {
         function_info_t = scm_make_smob_type ("g-i-function-info", 0);
+        scm_c_define_gsubr ("g-function-info-get-symbol",
+                            1,
+                            0,
+                            0,
+                            scm_g_function_info_get_symbol);
+        scm_c_define_gsubr ("g-function-info-get-flags",
+                            1,
+                            0,
+                            0,
+                            scm_g_function_info_get_flags);
+        scm_c_define_gsubr ("g-function-info-get-property",
+                            1,
+                            0,
+                            0,
+                            scm_g_function_info_get_property);
+        scm_c_define_gsubr ("g-function-info-get-vfunc",
+                            1,
+                            0,
+                            0,
+                            scm_g_function_info_get_vfunc);
         scm_c_define_gsubr ("g-function-info-invoke",
                             2,
                             0,
                             0,
                             scm_g_function_info_invoke);
+
+        scm_c_define (FUNCTION_IS_METHOD, scm_from_int (GI_FUNCTION_IS_METHOD));
+        scm_c_define (FUNCTION_IS_CONSTRUCTOR,
+                      scm_from_int (GI_FUNCTION_IS_CONSTRUCTOR));
+        scm_c_define (FUNCTION_IS_GETTER, scm_from_int (GI_FUNCTION_IS_GETTER));
+        scm_c_define (FUNCTION_IS_SETTER, scm_from_int (GI_FUNCTION_IS_SETTER));
+        scm_c_define (FUNCTION_WRAPS_VFUNC,
+                      scm_from_int (GI_FUNCTION_WRAPS_VFUNC));
+        scm_c_define (FUNCTION_THROWS, scm_from_int (GI_FUNCTION_THROWS));
 }
