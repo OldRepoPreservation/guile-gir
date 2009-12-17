@@ -26,7 +26,6 @@ scm_t_bits registered_type_info_t;
 scm_t_bits struct_info_t;
 scm_t_bits union_info_t;
 scm_t_bits enum_info_t;
-scm_t_bits object_info_t;
 scm_t_bits interface_info_t;
 scm_t_bits constant_info_t;
 scm_t_bits value_info_t;
@@ -47,7 +46,6 @@ types_init (void)
         struct_info_t = scm_make_smob_type ("g-i-struct-info", 0);
         union_info_t = scm_make_smob_type ("g-i-union-info", 0);
         enum_info_t = scm_make_smob_type ("g-i-enum-info", 0);
-        object_info_t = scm_make_smob_type ("g-i-object-info", 0);
         interface_info_t = scm_make_smob_type ("g-i-interface-info", 0);
         constant_info_t = scm_make_smob_type ("g-i-constant-info", 0);
         value_info_t = scm_make_smob_type ("g-i-value-info", 0);

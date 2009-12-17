@@ -18,30 +18,20 @@
  * along with Guile-GIR.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TYPES_H__
-#define __TYPES_H__
+#ifndef __OBJECT_H__
+#define __OBJECT_H__
 
 #include <glib.h>
 #include <libguile.h>
 #include <girepository.h>
 
-extern scm_t_bits base_info_t;
-extern scm_t_bits registered_type_info_t;
-extern scm_t_bits struct_info_t;
-extern scm_t_bits union_info_t;
-extern scm_t_bits enum_info_t;
-extern scm_t_bits interface_info_t;
-extern scm_t_bits constant_info_t;
-extern scm_t_bits value_info_t;
-extern scm_t_bits signal_info_t;
-extern scm_t_bits v_func_info_t;
-extern scm_t_bits property_info_t;
-extern scm_t_bits field_info_t;
-extern scm_t_bits type_info_t;
-extern scm_t_bits error_domain_info_t;
-extern scm_t_bits unresolved_info_t;
+/* SMOB types for ObjectInfo */
+extern scm_t_bits object_info_t;
+
+static SCM
+scm_g_object_info_get_class_struct      (SCM scm_object_info);
 
 G_GNUC_INTERNAL void
-types_init                              (void);
+object_init                             (void);
 
-#endif /* __TYPES_H__ */
+#endif /* __OBJECT_H__ */
