@@ -42,6 +42,11 @@
                  g-object-info-get-n-constants
                  g-object-info-get-constant
                  g-object-info-get-class-struct
+                 g-callable-info-get-return-type
+                 g-callable-info-get-caller-owns
+                 g-callable-info-may-return-null
+                 g-callable-info-get-n-args
+                 g-callable-info-get-arg
                  g-function-info-invoke))
 
 (dynamic-call "init"

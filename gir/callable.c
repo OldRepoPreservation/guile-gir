@@ -19,11 +19,93 @@
  */
 
 #include "callable.h"
+#include "types.h"
+
+/* Symbol names for GITransfer values */
+#define TRANSFER_NOTHING_SYMBOL "g-i-transfer-nothing"
+#define TRANSFER_CONTAINER_SYMBOL "g-i-transfer-container"
+#define TRANSFER_EVERYTHING_SYMBOL "g-i-transfer-everything"
 
 /* SMOB types for CallableInfo & associated types */
 scm_t_bits callable_info_t;
 scm_t_bits callback_info_t;
 scm_t_bits arg_info_t;
+
+static SCM
+scm_g_callable_info_get_return_type (SCM scm_callable_info)
+{
+        GICallableInfo *callable_info;
+        GITypeInfo *type_info;
+        SCM scm_return;
+
+        callable_info = (GICallableInfo *) SCM_SMOB_DATA (scm_callable_info);
+        type_info = g_callable_info_get_return_type (callable_info);
+        if (type_info == NULL)
+                return SCM_BOOL_F;
+        else {
+                scm_return = scm_make_smob (type_info_t);
+                SCM_SET_SMOB_DATA (scm_return, type_info);
+        }
+
+        return scm_return;
+}
+
+static SCM
+scm_g_callable_info_get_caller_owns (SCM scm_callable_info)
+{
+        GICallableInfo *callable_info;
+
+        callable_info = (GICallableInfo *) SCM_SMOB_DATA (scm_callable_info);
+        switch (g_callable_info_get_caller_owns (callable_info)) {
+                case GI_TRANSFER_NOTHING:
+                        return scm_str2symbol (TRANSFER_NOTHING_SYMBOL);
+                case GI_TRANSFER_CONTAINER:
+                        return scm_str2symbol (TRANSFER_CONTAINER_SYMBOL);
+                case GI_TRANSFER_EVERYTHING:
+                        return scm_str2symbol (TRANSFER_EVERYTHING_SYMBOL);
+                default:
+                        g_assert_not_reached ();
+        }
+}
+
+static SCM
+scm_g_callable_info_may_return_null (SCM scm_callable_info)
+{
+        GICallableInfo *callable_info;
+
+        callable_info = (GICallableInfo *) SCM_SMOB_DATA (scm_callable_info);
+
+        return scm_from_bool (g_callable_info_may_return_null (callable_info));
+}
+
+static SCM
+scm_g_callable_info_get_n_args (SCM scm_callable_info)
+{
+        GICallableInfo *callable_info;
+
+        callable_info = (GICallableInfo *) SCM_SMOB_DATA (scm_callable_info);
+
+        return scm_from_int (g_callable_info_get_n_args (callable_info));
+}
+
+static SCM
+scm_g_callable_info_get_arg (SCM scm_callable_info, SCM scm_n)
+{
+        GICallableInfo *callable_info;
+        GIArgInfo *arg_info;
+        SCM scm_return;
+
+        callable_info = (GICallableInfo *) SCM_SMOB_DATA (scm_callable_info);
+        arg_info = g_callable_info_get_arg (callable_info, scm_to_int (scm_n));
+        if (arg_info == NULL)
+                scm_return = SCM_BOOL_F;
+        else {
+                scm_return = scm_make_smob (arg_info_t);
+                SCM_SET_SMOB_DATA (scm_return, arg_info);
+        }
+
+        return scm_return;
+}
 
 void
 callable_init (void)
@@ -31,4 +113,30 @@ callable_init (void)
         callable_info_t = scm_make_smob_type ("g-i-callable-info", 0);
         callback_info_t = scm_make_smob_type ("g-i-callback-info", 0);
         arg_info_t = scm_make_smob_type ("g-i-arg-info", 0);
+
+        scm_c_define_gsubr ("g-callable-info-get-return-type",
+                            1,
+                            0,
+                            0,
+                            scm_g_callable_info_get_return_type);
+        scm_c_define_gsubr ("g-callable-info-get-caller-owns",
+                            1,
+                            0,
+                            0,
+                            scm_g_callable_info_get_caller_owns);
+        scm_c_define_gsubr ("g-callable-info-may-return-null",
+                            1,
+                            0,
+                            0,
+                            scm_g_callable_info_may_return_null);
+        scm_c_define_gsubr ("g-callable-info-get-n-args",
+                            1,
+                            0,
+                            0,
+                            scm_g_callable_info_get_n_args);
+        scm_c_define_gsubr ("g-callable-info-get-arg",
+                            2,
+                            0,
+                            0,
+                            scm_g_callable_info_get_arg);
 }
