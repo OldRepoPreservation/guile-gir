@@ -27,6 +27,7 @@
 #include <registered-type.h>
 #include <object.h>
 #include <function.h>
+#include <callable.h>
 
 void 
 init ()
@@ -38,6 +39,7 @@ init ()
         types_init ();
         registered_type_init ();
         object_init ();
-        call_init ();
+        function_init ();
+        callable_init ();
 }
 
