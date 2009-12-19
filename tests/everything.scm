@@ -19,66 +19,43 @@
 
 ;; Test cases against 'Everything' module provided by GIR.
 
-(define (call repo namespace func args)
-    (call-with-values (lambda () (g-function-info-invoke func args))
-                       list))
+(use-modules (gir))
+
+(define repo (g-irepository-get-default))
+(define namespace "Everything")
+(g-irepository-require repo namespace)
+
+(define (call func-name args)
+    (let ((func (g-irepository-find-by-name repo namespace func-name)))
+        (call-with-values (lambda () (g-function-info-invoke func args))
+                          list)))
 
 ;; UTF-8 related functions
 
 ;; functions dealing with constant strings
-(define (test-utf8-const-in repo namespace str)
-    (let ((func (g-irepository-find-by-name
-                                        repo
-                                        namespace
-                                        "test_utf8_const_in")))
-        (call repo namespace func (list str))))
+(define (test-utf8-const-in str)
+        (call "test_utf8_const_in" (list str)))
 
-(define (test-utf8-const-return repo namespace)
-    (let ((func (g-irepository-find-by-name
-                                        repo
-                                        namespace
-                                        "test_utf8_const_return")))
-        (call repo namespace func '())))
+(define (test-utf8-const-return)
+        (call "test_utf8_const_return" '()))
 
 ;; functions dealing with non-constant strings
-(define (test-utf8-nonconst-in repo namespace str)
-    (let ((func (g-irepository-find-by-name
-                                        repo
-                                        namespace
-                                        "test_utf8_nonconst_in")))
-        (call repo namespace func (list str))))
+(define (test-utf8-nonconst-in str)
+        (call "test_utf8_nonconst_in" (list str)))
 
-(define (test-utf8-nonconst-return repo namespace)
-    (let ((func (g-irepository-find-by-name
-                                        repo
-                                        namespace
-                                        "test_utf8_nonconst_return")))
-        (call repo namespace func '())))
+(define (test-utf8-nonconst-return)
+        (call "test_utf8_nonconst_return" '()))
 
-(define (test-utf8-out repo namespace)
-    (let ((func (g-irepository-find-by-name repo namespace "test_utf8_out")))
-        (display (call repo namespace func '()))))
+(define (test-utf8-out)
+        (display (call "test_utf8_out" '())))
 
 ;; functions dealing with complex types
-(define (test-simple-boxed-a-const-return repo namespace)
-    (let ((func (g-irepository-find-by-name
-                                        repo
-                                        namespace
-                                        "test_simple_boxed_a_const_return")))
-        (display (call repo namespace func '()))))
+(define (test-simple-boxed-a-const-return)
+        (display (call "test_simple_boxed_a_const_return" '())))
 
-(use-modules (gir))
-(let ((repo (g-irepository-get-default))
-      (namespace "Everything"))
-     (g-irepository-require repo namespace)
-
-     ; Now we test each toplevel static function
-     (test-utf8-const-in repo
-                         namespace
-                         (car (test-utf8-const-return repo namespace)))
-     (test-utf8-nonconst-in repo
-                            namespace
-                            (car (test-utf8-nonconst-return repo namespace)))
-     (test-utf8-out repo namespace)
-     (test-simple-boxed-a-const-return repo namespace))
+; Now we test each toplevel static function
+(test-utf8-const-in (car (test-utf8-const-return)))
+(test-utf8-nonconst-in (car (test-utf8-nonconst-return)))
+(test-utf8-out)
+(test-simple-boxed-a-const-return)
 
