@@ -53,11 +53,11 @@
         (call "test_utf8_nonconst_return" '()))
 
 (define (test-utf8-out)
-        (display (call "test_utf8_out" '())))
+        (call "test_utf8_out" '()))
 
 ;; functions dealing with complex types
 (define (test-simple-boxed-a-const-return)
-        (display (call "test_simple_boxed_a_const_return" '())))
+        (call "test_simple_boxed_a_const_return" '()))
 
 ; Now we test each toplevel static function
 (test-utf8-const-in (car (test-utf8-const-return)))
