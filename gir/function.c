@@ -272,7 +272,7 @@ scm_to_gi_interface (SCM         scm_arg,
         SCM scm_instance;
 
         base_info = g_type_info_get_interface (arg_type);
-        *c_instance = &(arg->v_pointer);
+        c_instance = &(arg->v_pointer);
 
         switch (g_base_info_get_type (base_info)) {
                 case GI_INFO_TYPE_OBJECT:
