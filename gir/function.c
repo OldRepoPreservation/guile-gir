@@ -51,10 +51,10 @@ gi_interface_to_scm (GITypeInfo *arg_type,
                      GITransfer  transfer_type,
                      GArgument   arg);
 static void
-scm_to_gi_interface (SCM         scm_arg,
-                     GITypeInfo *arg_type,
-                     GITransfer  transfer_type,
-                     GArgument  *arg);
+scm_to_gi_interface (SCM        scm_arg,
+                     GIInfoType arg_type,
+                     GITransfer transfer_type,
+                     GArgument *arg);
 static GArgument *
 construct_in_args (GICallableInfo *callable_info,
                    SCM             scm_in_args,
@@ -251,30 +251,34 @@ scm_to_gi_arg (SCM         scm_arg,
                         arg->v_string = scm_to_locale_string (scm_arg);
                         break;
                 case GI_TYPE_TAG_INTERFACE:
+                {
+                        GIBaseInfo *base_info;
+
+                        base_info = g_type_info_get_interface (arg_type);
+
                         scm_to_gi_interface (scm_arg,
-                                             arg_type,
+                                             g_base_info_get_type (base_info),
                                              transfer_type,
                                              arg);
                         break;
+                }
                 default:
                         break;
         }
 }
 
 static void
-scm_to_gi_interface (SCM         scm_arg,
-                     GITypeInfo *arg_type,
-                     GITransfer  transfer_type,
-                     GArgument  *arg)
+scm_to_gi_interface (SCM        scm_arg,
+                     GIInfoType arg_type,
+                     GITransfer transfer_type,
+                     GArgument *arg)
 {
-        GIBaseInfo *base_info;
         gpointer *c_instance;
         SCM scm_instance;
 
-        base_info = g_type_info_get_interface (arg_type);
         c_instance = &(arg->v_pointer);
 
-        switch (g_base_info_get_type (base_info)) {
+        switch (arg_type) {
                 case GI_INFO_TYPE_OBJECT:
                 case GI_INFO_TYPE_INTERFACE:
                         if (transfer_type == GI_TRANSFER_EVERYTHING)
