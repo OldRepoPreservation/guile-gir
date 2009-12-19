@@ -320,13 +320,30 @@ construct_in_args (GICallableInfo *callable_info,
         *n_in_args = 0;
         n_args = g_callable_info_get_n_args (callable_info);
 
-        if (n_args < 0)
-                return NULL;
-
         /* FIXME: We are allocating array for all arguments although it only
          *        needs to be big enough to fit 'in' arguments.
          */
-        in_args = g_malloc0 (sizeof (GArgument) * n_args);
+        if ((g_function_info_get_flags ((GIFunctionInfo *) callable_info) &
+             GI_FUNCTION_IS_METHOD) != 0) {
+                GIBaseInfo *container;
+                GIInfoType type;
+                SCM arg;
+
+                in_args = g_malloc0 (sizeof (GArgument) * (n_args + 1));
+
+                container = g_base_info_get_container (
+                                        (GIBaseInfo *) callable_info);
+                type = g_base_info_get_type (container);
+
+                arg = scm_list_ref (scm_in_args, scm_from_int (*n_in_args));
+                scm_to_gi_interface (arg,
+                                     type,
+                                     GI_TRANSFER_NOTHING,
+                                     &in_args[*n_in_args]);
+
+                (*n_in_args)++;
+        } else
+                in_args = g_malloc0 (sizeof (GArgument) * n_args);
 
         for (i = 0; i < n_args; i++) {
                 GIArgInfo *arg_info;
