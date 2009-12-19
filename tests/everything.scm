@@ -26,9 +26,15 @@
 (g-irepository-require repo namespace)
 
 (define (call func-name args)
+    (display "Calling '")
+    (display func-name)
+    (display "'..")
     (let ((func (g-irepository-find-by-name repo namespace func-name)))
-        (call-with-values (lambda () (g-function-info-invoke func args))
-                          list)))
+        (let ((out-args (call-with-values
+                              (lambda () (g-function-info-invoke func args))
+                                         list)))
+             (display "DONE.\n")
+             out-args)))
 
 ;; UTF-8 related functions
 
