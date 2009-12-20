@@ -52,6 +52,16 @@
                  g-function-info-get-property
                  g-function-info-get-vfunc
                  g-function-info-invoke
+                 g-arg-info-get-direction
+                 g-arg-info-is-dipper
+                 g-arg-info-is-return-value
+                 g-arg-info-is-optional
+                 g-arg-info-may-be-null
+                 g-arg-info-get-ownership-transfer
+                 g-arg-info-get-scope
+                 g-arg-info-get-closure
+                 g-arg-info-get-destroy
+                 g-arg-info-get-type
                  g-i-transfer-nothing
                  g-i-transfer-container
                  g-i-transfer-everything
@@ -60,7 +70,14 @@
                  g-i-function-is-getter
                  g-i-function-is-setter
                  g-i-function-wraps-vfunc
-                 g-i-function-throws))
+                 g-i-function-throws
+                 g-i-direction-in
+                 g-i-direction-out
+                 g-i-direction-inout
+                 g-i-scope-type-invalid
+                 g-i-scope-type-call
+                 g-i-scope-type-async
+                 g-i-scope-type-notified))
 
 (dynamic-call "init"
               (dynamic-link "libguile-gir-1.0.so"))
