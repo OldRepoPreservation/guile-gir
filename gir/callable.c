@@ -56,7 +56,7 @@ scm_g_callable_info_get_caller_owns (SCM scm_callable_info)
 
         callable_info = (GICallableInfo *) SCM_SMOB_DATA (scm_callable_info);
 
-        scm_from_int (g_callable_info_get_caller_owns (callable_info));
+        return scm_from_int (g_callable_info_get_caller_owns (callable_info));
 }
 
 static SCM
