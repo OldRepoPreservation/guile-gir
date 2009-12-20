@@ -27,7 +27,6 @@
 
 extern scm_t_bits callable_info_t;
 extern scm_t_bits callback_info_t;
-extern scm_t_bits arg_info_t;
 
 G_GNUC_INTERNAL void
 callable_init                           (void);

@@ -8,6 +8,8 @@ libguile_gir_1_0_la_SOURCES = gir.c \
 			      function.h \
 			      callable.c \
 			      callable.h \
+			      argument.c \
+			      argument.h \
 			      object.c \
 			      object.h \
 			      registered-type.c \

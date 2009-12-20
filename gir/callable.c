@@ -20,16 +20,15 @@
 
 #include "callable.h"
 #include "types.h"
+#include "argument.h"
 
 /* Symbol names for GITransfer values */
 #define TRANSFER_NOTHING_SYMBOL "g-i-transfer-nothing"
 #define TRANSFER_CONTAINER_SYMBOL "g-i-transfer-container"
 #define TRANSFER_EVERYTHING_SYMBOL "g-i-transfer-everything"
 
-/* SMOB types for CallableInfo & associated types */
 scm_t_bits callable_info_t;
 scm_t_bits callback_info_t;
-scm_t_bits arg_info_t;
 
 static SCM
 scm_g_callable_info_get_return_type (SCM scm_callable_info)
@@ -104,7 +103,6 @@ callable_init (void)
 {
         callable_info_t = scm_make_smob_type ("g-i-callable-info", 0);
         callback_info_t = scm_make_smob_type ("g-i-callback-info", 0);
-        arg_info_t = scm_make_smob_type ("g-i-arg-info", 0);
 
         scm_c_define_gsubr ("g-callable-info-get-return-type",
                             1,

@@ -41,5 +41,6 @@ init ()
         object_init ();
         function_init ();
         callable_init ();
+        argument_init ();
 }
 
