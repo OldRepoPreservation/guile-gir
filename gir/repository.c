@@ -88,6 +88,8 @@ scm_g_irepository_find_by_name (SCM scm_repository,
         info = g_irepository_find_by_name (repo,
                                            scm_to_locale_string (scm_namespace),
                                            scm_to_locale_string (scm_name));
+        if (info == NULL)
+                return SCM_UNSPECIFIED;
 
         scm_info = scm_make_smob (base_info_t);
         SCM_SET_SMOB_DATA (scm_info, info);
