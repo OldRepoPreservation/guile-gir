@@ -29,39 +29,42 @@
 (define namespace "Everything")
 (g-irepository-require repo namespace)
 
-(define (call func-name args)
+(define (call func args)
     (display "Calling '")
-    (display func-name)
+    (display (g-function-info-get-symbol func))
     (display "'..")
+    (let ((out-args (call-with-values (lambda () (g-function-info-invoke func
+                                                                         args))
+                                      list)))
+         (display "DONE.\n")
+         out-args))
+
+(define (simple-call func-name args)
     (let ((func (g-irepository-find-by-name repo namespace func-name)))
-        (let ((out-args (call-with-values
-                              (lambda () (g-function-info-invoke func args))
-                                         list)))
-             (display "DONE.\n")
-             out-args)))
+         (call func args)))
 
 ;; UTF-8 related functions
 
 ;; functions dealing with constant strings
 (define (test-utf8-const-in str)
-        (call "test_utf8_const_in" (list str)))
+        (simple-call "test_utf8_const_in" (list str)))
 
 (define (test-utf8-const-return)
-        (call "test_utf8_const_return" '()))
+        (simple-call "test_utf8_const_return" '()))
 
 ;; functions dealing with non-constant strings
 (define (test-utf8-nonconst-in str)
-        (call "test_utf8_nonconst_in" (list str)))
+        (simple-call "test_utf8_nonconst_in" (list str)))
 
 (define (test-utf8-nonconst-return)
-        (call "test_utf8_nonconst_return" '()))
+        (simple-call "test_utf8_nonconst_return" '()))
 
 (define (test-utf8-out)
-        (call "test_utf8_out" '()))
+        (simple-call "test_utf8_out" '()))
 
 ;; functions dealing with complex types
 (define (test-simple-boxed-a-const-return)
-        (call "test_simple_boxed_a_const_return" '()))
+        (simple-call "test_simple_boxed_a_const_return" '()))
 
 ; Now we test each toplevel static function
 (test-utf8-const-in (car (test-utf8-const-return)))
