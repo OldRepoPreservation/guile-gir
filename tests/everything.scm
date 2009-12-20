@@ -19,6 +19,10 @@
 
 ;; Test cases against 'Everything' module provided by GIR.
 
+;; Exits the script if form evaluates to #f
+(define-macro (assert x)
+              `(if (not ,x) (error "assertion failed" ',x)))
+
 (use-modules (gir))
 
 (define repo (g-irepository-get-default))
