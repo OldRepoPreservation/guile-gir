@@ -29,6 +29,9 @@
 (define namespace "Everything")
 (g-irepository-require repo namespace)
 
+(define test-obj-info (g-irepository-find-by-name repo namespace "TestObj"))
+(assert (not (unspecified? test-obj-info)))
+
 (define (call func args)
     (display "Calling '")
     (display (g-function-info-get-symbol func))
@@ -42,6 +45,10 @@
 (define (simple-call func-name args)
     (let ((func (g-irepository-find-by-name repo namespace func-name)))
          (call func args)))
+
+(define (method-call obj-info method-name args)
+    (let ((method (g-object-info-find-method obj-info method-name)))
+         (call method args)))
 
 ;; UTF-8 related functions
 
@@ -66,9 +73,33 @@
 (define (test-simple-boxed-a-const-return)
         (simple-call "test_simple_boxed_a_const_return" '()))
 
+; Methods
+(define (test-obj-static-method)
+        (method-call test-obj-info "static_method" (list 47)))
+
+(define (test-obj-new-from-file)
+        (car (method-call test-obj-info "new_from_file" (list "hi"))))
+
+(define (test-obj-do-matrix test-obj)
+        (method-call test-obj-info "do_matrix" (list test-obj "hello")))
+
+(define (test-obj-instance-method test-obj)
+        (method-call test-obj-info "instance_method" (list test-obj)))
+
+(define (test-obj-set-bare test-obj another-obj)
+        (method-call test-obj-info "set_bare" (list test-obj another-obj)))
+
 ; Now we test each toplevel static function
 (test-utf8-const-in (car (test-utf8-const-return)))
 (test-utf8-nonconst-in (car (test-utf8-nonconst-return)))
 (test-utf8-out)
 (test-simple-boxed-a-const-return)
+
+; First test TestObj methods
+(test-obj-static-method)
+(let ((test-obj (test-obj-new-from-file)))
+     (test-obj-do-matrix test-obj)
+     (test-obj-instance-method test-obj)
+     (let ((another-obj (test-obj-new-from-file)))
+          (test-obj-set-bare test-obj another-obj)))
 
