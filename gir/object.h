@@ -28,9 +28,6 @@
 /* SMOB types for ObjectInfo */
 extern scm_t_bits object_info_t;
 
-static SCM
-scm_g_object_info_get_class_struct      (SCM scm_object_info);
-
 G_GNUC_INTERNAL void
 object_init                             (void);
 

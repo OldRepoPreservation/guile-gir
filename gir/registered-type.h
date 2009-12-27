@@ -28,9 +28,6 @@
 /* SMOB types for RegisteredTypeInfo */
 extern scm_t_bits registered_type_info_t;
 
-static SCM
-scm_g_registered_type_info_get_g_type            (SCM scm_info);
-
 G_GNUC_INTERNAL void
 registered_type_init                             (void);
 
