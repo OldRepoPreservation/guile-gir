@@ -28,6 +28,7 @@
 #include <object.h>
 #include <function.h>
 #include <callable.h>
+#include <argument.h>
 
 void 
 init ()
