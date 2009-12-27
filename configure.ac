@@ -34,6 +34,14 @@ PKG_CHECK_MODULES(GUILE_GLIB, guile-gnome-glib-2 >= 2.16.1)
 AC_SUBST(GUILE_GLIB_LIBS)
 AC_SUBST(GUILE_GLIB_CFLAGS)
 
+# Debugging
+AC_ARG_ENABLE(debug,
+	[  --enable-debug          enable debugging],,
+        enable_debug=no)
+if test "x$enable_debug" = "xyes"; then
+        CFLAGS="$CFLAGS -g -Wall -Werror"
+fi
+
 dnl Done.
 AC_CONFIG_FILES([Makefile
                  gir/Makefile
