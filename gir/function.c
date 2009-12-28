@@ -287,6 +287,8 @@ scm_g_function_info_invoke (SCM scm_info,
 
         info = (GIFunctionInfo *) SCM_SMOB_DATA (scm_info);
         callable_info = (GICallableInfo *) info;
+        out_arg_indices = NULL;
+        real_out_args = NULL;
 
         in_args = construct_in_args (callable_info, scm_in_args, &n_in_args);
         out_args = construct_out_args (callable_info,
