@@ -234,7 +234,6 @@ scm_to_gi_interface (SCM        scm_arg,
                      GArgument *arg)
 {
         gpointer *c_instance;
-        SCM scm_instance;
 
         c_instance = &(arg->v_pointer);
 

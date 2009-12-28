@@ -278,7 +278,6 @@ scm_g_function_info_invoke (SCM scm_info,
         int n_in_args;
         int n_out_args;
         int *out_arg_indices;
-        int n_args;
         GArgument *in_args;
         GArgument *out_args;
         GArgument *real_out_args;
