@@ -224,6 +224,7 @@ scm_to_gi_arg (SCM        scm_arg,
                         scm_to_gi_interface (scm_arg,
                                              g_base_info_get_type (base_info),
                                              transfer,
+                                             base_info,
                                              arg);
                         break;
                 }
@@ -233,10 +234,11 @@ scm_to_gi_arg (SCM        scm_arg,
 }
 
 void
-scm_to_gi_interface (SCM        scm_arg,
-                     GIInfoType arg_type,
-                     GITransfer transfer_type,
-                     GArgument *arg)
+scm_to_gi_interface (SCM         scm_arg,
+                     GIInfoType  arg_type,
+                     GITransfer  transfer_type,
+                     GIBaseInfo *info,
+                     GArgument  *arg)
 {
         gpointer *c_instance;
 

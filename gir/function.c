@@ -85,6 +85,7 @@ construct_in_args (GICallableInfo *callable_info,
                 scm_to_gi_interface (arg,
                                      type,
                                      GI_TRANSFER_NOTHING,
+                                     container,
                                      &in_args[*n_in_args]);
 
                 (*n_in_args)++;

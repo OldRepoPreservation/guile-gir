@@ -50,6 +50,7 @@ G_GNUC_INTERNAL void
 scm_to_gi_interface                     (SCM                    scm_arg,
                                          GIInfoType             arg_type,
                                          GITransfer             transfer_type,
+                                         GIBaseInfo            *info,
                                          GArgument             *arg);
 
 G_GNUC_INTERNAL void
