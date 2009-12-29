@@ -147,11 +147,14 @@ gi_interface_to_scm (GITypeInfo *arg_type,
 }
 
 void
-scm_to_gi_arg (SCM         scm_arg,
-               GITypeInfo *arg_type,
-               GITransfer  transfer_type,
-               GArgument  *arg)
+scm_to_gi_arg (SCM        scm_arg,
+               GIArgInfo *arg_info,
+               GArgument *arg)
 {
+        GITypeInfo *arg_type;
+
+        arg_type = g_arg_info_get_type (arg_info);
+
         switch (g_type_info_get_tag (arg_type)) {
                 case GI_TYPE_TAG_BOOLEAN:
                         arg->v_boolean = scm_to_bool (scm_arg);
@@ -213,12 +216,14 @@ scm_to_gi_arg (SCM         scm_arg,
                 case GI_TYPE_TAG_INTERFACE:
                 {
                         GIBaseInfo *base_info;
+                        GITransfer transfer;
 
                         base_info = g_type_info_get_interface (arg_type);
+                        transfer = g_arg_info_get_ownership_transfer (arg_info);
 
                         scm_to_gi_interface (scm_arg,
                                              g_base_info_get_type (base_info),
-                                             transfer_type,
+                                             transfer,
                                              arg);
                         break;
                 }

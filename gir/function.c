@@ -94,8 +94,6 @@ construct_in_args (GICallableInfo *callable_info,
         for (i = 0; i < n_args; i++) {
                 GIArgInfo *arg_info;
                 GIDirection direction;
-                GITransfer transfer_type;
-                GITypeInfo *type;
                 SCM arg;
 
                 arg_info = g_callable_info_get_arg (callable_info, i);
@@ -104,11 +102,8 @@ construct_in_args (GICallableInfo *callable_info,
                     direction != GI_DIRECTION_INOUT)
                         continue;
 
-                type = g_arg_info_get_type (arg_info);
-                transfer_type = g_arg_info_get_ownership_transfer (arg_info);
-
                 arg = scm_list_ref (scm_in_args, scm_from_int (*n_in_args));
-                scm_to_gi_arg (arg, type, transfer_type, &in_args[*n_in_args]);
+                scm_to_gi_arg (arg, arg_info, &in_args[*n_in_args]);
 
                 (*n_in_args)++;
         }
