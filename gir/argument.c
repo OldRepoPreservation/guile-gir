@@ -19,6 +19,7 @@
  */
 
 #include <guile-gnome-gobject.h>
+#include <girffi.h>
 #include "argument.h"
 #include "types.h"
 
@@ -32,6 +33,12 @@
 #define SCOPE_TYPE_NOTIFIED_SYMBOL "g-i-scope-type-notified"
 
 scm_t_bits arg_info_t;
+
+static void
+callback_closure (ffi_cif *cif,
+                  void    *result,
+                  void   **args,
+                  void    *data);
 
 SCM
 gi_return_value_to_scm (GICallableInfo *info,
@@ -268,9 +275,31 @@ scm_to_gi_interface (SCM         scm_arg,
 
                         break;
                 }
+                case GI_INFO_TYPE_CALLBACK:
+                {
+                        ffi_cif *cif;
+
+                        cif = g_slice_new0 (ffi_cif);
+                        *c_instance = g_callable_info_prepare_closure (
+                                        (GICallableInfo *) info,
+                                        cif,
+                                        callback_closure,
+                                        SCM2PTR (scm_arg));
+
+                        break;
+                }
                 default:
                         break;
         }
+}
+
+static void
+callback_closure (ffi_cif *cif,
+                  void    *result,
+                  void   **args,
+                  void    *data)
+{
+        scm_call_0 (PTR2SCM (data));
 }
 
 static SCM
