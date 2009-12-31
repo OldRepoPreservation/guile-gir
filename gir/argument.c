@@ -37,6 +37,8 @@ scm_t_bits arg_info_t;
 typedef struct
 {
         SCM scm_callback;
+
+        GICallableInfo *callable_info;
 } CallbackClosureData;
 
 static void
@@ -289,9 +291,10 @@ scm_to_gi_interface (SCM         scm_arg,
 
                         data = g_slice_new0 (CallbackClosureData);
                         data->scm_callback = scm_arg;
+                        data->callable_info = (GICallableInfo *) info;
 
                         *c_instance = g_callable_info_prepare_closure (
-                                        (GICallableInfo *) info,
+                                        data->callable_info,
                                         cif,
                                         callback_closure,
                                         data);
