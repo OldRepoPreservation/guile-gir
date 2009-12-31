@@ -73,6 +73,10 @@
 (define (test-simple-boxed-a-const-return)
         (simple-call "test_simple_boxed_a_const_return" '()))
 
+(define (test-callback)
+        (simple-call "test_callback"
+                     (list (lambda () (display "Callback called. ")))))
+
 ; Methods
 (define (test-obj-static-method)
         (method-call test-obj-info "static_method" (list 47)))
@@ -94,6 +98,8 @@
 (test-utf8-nonconst-in (car (test-utf8-nonconst-return)))
 (test-utf8-out)
 (test-simple-boxed-a-const-return)
+
+(test-callback)
 
 ; First test TestObj methods
 (test-obj-static-method)
