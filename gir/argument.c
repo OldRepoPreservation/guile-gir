@@ -34,6 +34,11 @@
 
 scm_t_bits arg_info_t;
 
+typedef struct
+{
+        SCM scm_callback;
+} CallbackClosureData;
+
 static void
 callback_closure (ffi_cif *cif,
                   void    *result,
@@ -278,13 +283,18 @@ scm_to_gi_interface (SCM         scm_arg,
                 case GI_INFO_TYPE_CALLBACK:
                 {
                         ffi_cif *cif;
+                        CallbackClosureData *data;
 
                         cif = g_slice_new0 (ffi_cif);
+
+                        data = g_slice_new0 (CallbackClosureData);
+                        data->scm_callback = scm_arg;
+
                         *c_instance = g_callable_info_prepare_closure (
                                         (GICallableInfo *) info,
                                         cif,
                                         callback_closure,
-                                        SCM2PTR (scm_arg));
+                                        data);
 
                         break;
                 }
@@ -299,7 +309,9 @@ callback_closure (ffi_cif *cif,
                   void   **args,
                   void    *data)
 {
-        scm_call_0 (PTR2SCM (data));
+        CallbackClosureData *closure_data = (CallbackClosureData *) data;
+
+        scm_call_0 (closure_data->scm_callback);
 }
 
 static SCM
