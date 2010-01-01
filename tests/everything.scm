@@ -77,6 +77,10 @@
         (simple-call "test_callback"
                      (list (lambda () (display "Callback called. ")))))
 
+(define (test-callback-destroy-notify)
+        (simple-call "test_callback_destroy_notify"
+                     (list display "Callback called. " display)))
+
 ; Methods
 (define (test-obj-static-method)
         (method-call test-obj-info "static_method" (list 47)))
@@ -100,6 +104,7 @@
 (test-simple-boxed-a-const-return)
 
 (test-callback)
+(test-callback-destroy-notify)
 
 ; First test TestObj methods
 (test-obj-static-method)
