@@ -317,9 +317,35 @@ callback_closure (ffi_cif *cif,
                   void   **args,
                   void    *data)
 {
-        CallbackClosureData *closure_data = (CallbackClosureData *) data;
+        CallbackClosureData *closure_data;
+        SCM *scm_args;
+        int i, n_args;
 
-        scm_call_0 (closure_data->scm_callback);
+        closure_data = (CallbackClosureData *) data;
+
+        n_args = g_callable_info_get_n_args (closure_data->callable_info);
+        scm_args = (SCM *) g_new0 (SCM, n_args);
+        for (i = 0; i < n_args; i++) {
+                GIArgInfo *arg_info;
+                GITypeInfo *arg_type;
+                GITransfer transfer_type;
+
+                arg_info = g_callable_info_get_arg (closure_data->callable_info,
+                                                    i);
+                arg_type = g_arg_info_get_type (arg_info);
+                transfer_type = g_arg_info_get_ownership_transfer (arg_info);
+
+                scm_args[i] = gi_arg_to_scm (arg_type,
+                                             transfer_type,
+                                             *((GArgument *) args[i]));
+
+                g_base_info_unref ((GIBaseInfo*) arg_info);
+                g_base_info_unref ((GIBaseInfo*) arg_type);
+        }
+
+        scm_call_n (closure_data->scm_callback, scm_args, n_args);
+
+        g_free (scm_args);
 }
 
 static SCM
