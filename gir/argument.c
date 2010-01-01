@@ -66,6 +66,8 @@ gi_arg_to_scm (GITypeInfo *arg_type,
                GArgument   arg)
 {
         switch (g_type_info_get_tag (arg_type)) {
+                case GI_TYPE_TAG_VOID:
+                        return PTR2SCM (arg.v_pointer);
                 case GI_TYPE_TAG_BOOLEAN:
                         return scm_from_bool (arg.v_boolean);
                 case GI_TYPE_TAG_INT8:
@@ -170,6 +172,9 @@ scm_to_gi_arg (SCM        scm_arg,
         arg_type = g_arg_info_get_type (arg_info);
 
         switch (g_type_info_get_tag (arg_type)) {
+                case GI_TYPE_TAG_VOID:
+                        arg->v_pointer = SCM2PTR (scm_arg);
+                        break;
                 case GI_TYPE_TAG_BOOLEAN:
                         arg->v_boolean = scm_to_bool (scm_arg);
                         break;
