@@ -38,7 +38,8 @@ gi_arg_to_scm                           (GITypeInfo            *arg_type,
 
 G_GNUC_INTERNAL void
 scm_to_gi_arg                           (SCM                    scm_arg,
-                                         GIArgInfo             *arg_info,
+                                         GITypeInfo            *arg_type,
+                                         GITransfer             transfer_type,
                                          GArgument             *arg);
 
 G_GNUC_INTERNAL SCM
