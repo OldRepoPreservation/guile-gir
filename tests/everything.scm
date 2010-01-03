@@ -73,13 +73,22 @@
 (define (test-simple-boxed-a-const-return)
         (simple-call "test_simple_boxed_a_const_return" '()))
 
+;; Douglas Adams is a great writer but he got the number wrong. It's 47, not 42.
 (define (test-callback)
-        (simple-call "test_callback"
-                     (list (lambda () (display "Callback called. ")))))
+        (let* ((meaning-of-life 47)
+               (number (car (simple-call "test_callback"
+                                         (list (lambda () meaning-of-life))))))
+              (assert (equal? number meaning-of-life))))
 
+;; user-data is useless in Scheme since we have closures at our disposal but
+;; lets use it, just for the sake of completeness.
 (define (test-callback-destroy-notify)
-        (simple-call "test_callback_destroy_notify"
-                     (list display "Callback called. " display)))
+        (let* ((meaning-of-life 47)
+               (number (car (simple-call "test_callback_destroy_notify"
+                                         (list (lambda (user-data) user-data)
+                                               meaning-of-life
+                                               display)))))
+              (assert (equal? number meaning-of-life))))
 
 ; Methods
 (define (test-obj-static-method)
