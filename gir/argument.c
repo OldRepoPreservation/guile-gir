@@ -329,6 +329,7 @@ callback_closure (ffi_cif *cif,
         CallbackClosureData *closure_data;
         SCM *scm_args;
         int i, n_args;
+        SCM scm_return;
 
         closure_data = (CallbackClosureData *) data;
 
@@ -352,7 +353,11 @@ callback_closure (ffi_cif *cif,
                 g_base_info_unref ((GIBaseInfo*) arg_type);
         }
 
-        scm_call_n (closure_data->scm_callback, scm_args, n_args);
+        scm_return = scm_call_n (closure_data->scm_callback, scm_args, n_args);
+
+        scm_return_value_to_gi (scm_return,
+                                closure_data->callable_info,
+                                (GArgument *) result);
 
         g_free (scm_args);
 }
