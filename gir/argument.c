@@ -60,6 +60,20 @@ gi_return_value_to_scm (GICallableInfo *info,
         return gi_arg_to_scm (return_type, transfer_type, return_value);
 }
 
+void
+scm_return_value_to_gi (SCM             scm_return,
+                        GICallableInfo *info,
+                        GArgument      *return_value)
+{
+        GITypeInfo *return_type;
+        GITransfer  transfer_type;
+
+        return_type = g_callable_info_get_return_type (info);
+        transfer_type = g_callable_info_get_caller_owns (info);
+
+        scm_to_gi_arg (scm_return, return_type, transfer_type, return_value);
+}
+
 SCM
 gi_arg_to_scm (GITypeInfo *arg_type,
                GITransfer  transfer_type,

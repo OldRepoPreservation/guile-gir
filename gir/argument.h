@@ -31,6 +31,11 @@ G_GNUC_INTERNAL SCM
 gi_return_value_to_scm                  (GICallableInfo        *info,
                                          GArgument              return_value);
 
+G_GNUC_INTERNAL void
+scm_return_value_to_gi                  (SCM                    scm_return,
+                                         GICallableInfo        *info,
+                                         GArgument             *return_value);
+
 G_GNUC_INTERNAL SCM
 gi_arg_to_scm                           (GITypeInfo            *arg_type,
                                          GITransfer             transfer_type,
