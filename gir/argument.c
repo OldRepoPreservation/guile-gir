@@ -39,6 +39,8 @@ typedef struct
         SCM scm_callback;
 
         GICallableInfo *callable_info;
+
+        GIScopeType scope_type;
 } CallbackClosureData;
 
 static void
@@ -71,7 +73,11 @@ scm_return_value_to_gi (SCM             scm_return,
         return_type = g_callable_info_get_return_type (info);
         transfer_type = g_callable_info_get_caller_owns (info);
 
-        scm_to_gi_arg (scm_return, return_type, transfer_type, return_value);
+        scm_to_gi_arg (scm_return,
+                       return_type,
+                       transfer_type,
+                       GI_SCOPE_TYPE_INVALID,
+                       return_value);
 }
 
 SCM
@@ -180,6 +186,7 @@ void
 scm_to_gi_arg (SCM         scm_arg,
                GITypeInfo *arg_type,
                GITransfer  transfer_type,
+               GIScopeType scope_type,
                GArgument  *arg)
 {
         switch (g_type_info_get_tag (arg_type)) {
@@ -252,6 +259,7 @@ scm_to_gi_arg (SCM         scm_arg,
                         scm_to_gi_interface (scm_arg,
                                              g_base_info_get_type (base_info),
                                              transfer_type,
+                                             scope_type,
                                              base_info,
                                              arg);
                         break;
@@ -265,6 +273,7 @@ void
 scm_to_gi_interface (SCM         scm_arg,
                      GIInfoType  arg_type,
                      GITransfer  transfer_type,
+                     GIScopeType scope_type,
                      GIBaseInfo *info,
                      GArgument  *arg)
 {
@@ -306,6 +315,7 @@ scm_to_gi_interface (SCM         scm_arg,
                         data = g_slice_new0 (CallbackClosureData);
                         data->scm_callback = scm_arg;
                         data->callable_info = (GICallableInfo *) info;
+                        data->scope_type = scope_type;
 
                         *c_instance = g_callable_info_prepare_closure (
                                         data->callable_info,

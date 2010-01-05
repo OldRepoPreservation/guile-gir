@@ -85,6 +85,7 @@ construct_in_args (GICallableInfo *callable_info,
                 scm_to_gi_interface (arg,
                                      type,
                                      GI_TRANSFER_NOTHING,
+                                     GI_SCOPE_TYPE_INVALID,
                                      container,
                                      &in_args[*n_in_args]);
 
@@ -97,6 +98,7 @@ construct_in_args (GICallableInfo *callable_info,
                 GITypeInfo *arg_type;
                 GIDirection direction;
                 GITransfer transfer;
+                GIScopeType scope;
                 SCM arg;
 
                 arg_info = g_callable_info_get_arg (callable_info, i);
@@ -106,9 +108,14 @@ construct_in_args (GICallableInfo *callable_info,
                         continue;
                 arg_type = g_arg_info_get_type (arg_info);
                 transfer = g_arg_info_get_ownership_transfer (arg_info);
+                scope = g_arg_info_get_scope (arg_info);
 
                 arg = scm_list_ref (scm_in_args, scm_from_int (*n_in_args));
-                scm_to_gi_arg (arg, arg_type, transfer, &in_args[*n_in_args]);
+                scm_to_gi_arg (arg,
+                               arg_type,
+                               transfer,
+                               scope,
+                               &in_args[*n_in_args]);
 
                 (*n_in_args)++;
         }
