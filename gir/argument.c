@@ -317,6 +317,10 @@ scm_to_gi_interface (SCM         scm_arg,
                         data->callable_info = (GICallableInfo *) info;
                         data->scope_type = scope_type;
 
+                        if (scope_type == GI_SCOPE_TYPE_ASYNC ||
+                            scope_type == GI_SCOPE_TYPE_NOTIFIED)
+                                scm_gc_protect_object (scm_arg);
+
                         *c_instance = g_callable_info_prepare_closure (
                                         data->callable_info,
                                         cif,
@@ -370,6 +374,10 @@ callback_closure (ffi_cif *cif,
                                 (GArgument *) result);
 
         g_free (scm_args);
+
+        if (closure_data->scope_type == GI_SCOPE_TYPE_ASYNC)
+                /* FIXME: We are leaking in case of GI_SCOPE_TYPE_NOTIFIED */
+                scm_gc_unprotect_object (closure_data->scm_callback);
 }
 
 static SCM
