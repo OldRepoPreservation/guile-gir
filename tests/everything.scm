@@ -85,8 +85,9 @@
 (define (test-callback-destroy-notify)
         (let* ((meaning-of-life 47)
                (number (car (simple-call "test_callback_destroy_notify"
-                                         (list (lambda (user-data) user-data)
-                                               meaning-of-life
+                                         (list (lambda (user-data)
+                                                       meaning-of-life)
+                                               #f
                                                display)))))
               (assert (equal? number meaning-of-life))))
 

@@ -109,6 +109,23 @@ construct_in_args (GICallableInfo *callable_info,
                 GArgument *destroy_arg;
                 SCM arg;
 
+                /* FIXME: We are assuming that the DestroyNotify and closure are
+                 *        always immediately after the callback argument.
+                 */
+                if (i == destroy) {
+                        (*n_in_args)++;
+                        destroy = -1;
+
+                        continue;
+                }
+
+                if (i == closure) {
+                        (*n_in_args)++;
+                        closure = -1;
+
+                        continue;
+                }
+
                 arg_info = g_callable_info_get_arg (callable_info, i);
                 direction = g_arg_info_get_direction (arg_info);
                 if (direction != GI_DIRECTION_IN &&
