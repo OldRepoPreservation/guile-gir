@@ -36,12 +36,42 @@ scm_t_bits arg_info_t;
 
 typedef struct
 {
+        ffi_cif *cif;
         SCM scm_callback;
 
         GICallableInfo *callable_info;
 
         GIScopeType scope_type;
-} CallbackClosureData;
+} CallbackData;
+
+static CallbackData *
+callback_data_new (SCM             scm_callback,
+                   GICallableInfo *callable_info,
+                   GIScopeType     scope_type)
+{
+        CallbackData *data;
+
+        data = g_slice_new0 (CallbackData);
+        data->cif = g_slice_new0 (ffi_cif);
+        data->scm_callback = scm_callback;
+        data->callable_info = callable_info;
+        data->scope_type = scope_type;
+
+        if (scope_type == GI_SCOPE_TYPE_ASYNC ||
+            scope_type == GI_SCOPE_TYPE_NOTIFIED)
+                scm_gc_protect_object (scm_callback);
+
+        return data;
+}
+
+static void
+callback_data_free (CallbackData *data)
+{
+        scm_gc_unprotect_object (data->scm_callback);
+
+        g_slice_free (ffi_cif, data->cif);
+        g_slice_free (CallbackData, data);
+}
 
 static void
 callback_closure (ffi_cif *cif,
@@ -307,23 +337,15 @@ scm_to_gi_interface (SCM         scm_arg,
                 }
                 case GI_INFO_TYPE_CALLBACK:
                 {
-                        ffi_cif *cif;
-                        CallbackClosureData *data;
+                        CallbackData *data;
 
-                        cif = g_slice_new0 (ffi_cif);
-
-                        data = g_slice_new0 (CallbackClosureData);
-                        data->scm_callback = scm_arg;
-                        data->callable_info = (GICallableInfo *) info;
-                        data->scope_type = scope_type;
-
-                        if (scope_type == GI_SCOPE_TYPE_ASYNC ||
-                            scope_type == GI_SCOPE_TYPE_NOTIFIED)
-                                scm_gc_protect_object (scm_arg);
+                        data = callback_data_new (scm_arg,
+                                                  (GICallableInfo *) info,
+                                                  scope_type);
 
                         *c_instance = g_callable_info_prepare_closure (
                                         data->callable_info,
-                                        cif,
+                                        data->cif,
                                         callback_closure,
                                         data);
 
@@ -340,21 +362,21 @@ callback_closure (ffi_cif *cif,
                   void   **args,
                   void    *data)
 {
-        CallbackClosureData *closure_data;
+        CallbackData *callback_data;
         SCM *scm_args;
         int i, n_args;
         SCM scm_return;
 
-        closure_data = (CallbackClosureData *) data;
+        callback_data = (CallbackData *) data;
 
-        n_args = g_callable_info_get_n_args (closure_data->callable_info);
+        n_args = g_callable_info_get_n_args (callback_data->callable_info);
         scm_args = (SCM *) g_new0 (SCM, n_args);
         for (i = 0; i < n_args; i++) {
                 GIArgInfo *arg_info;
                 GITypeInfo *arg_type;
                 GITransfer transfer_type;
 
-                arg_info = g_callable_info_get_arg (closure_data->callable_info,
+                arg_info = g_callable_info_get_arg (callback_data->callable_info,
                                                     i);
                 arg_type = g_arg_info_get_type (arg_info);
                 transfer_type = g_arg_info_get_ownership_transfer (arg_info);
@@ -367,17 +389,17 @@ callback_closure (ffi_cif *cif,
                 g_base_info_unref ((GIBaseInfo*) arg_type);
         }
 
-        scm_return = scm_call_n (closure_data->scm_callback, scm_args, n_args);
+        scm_return = scm_call_n (callback_data->scm_callback, scm_args, n_args);
 
         scm_return_value_to_gi (scm_return,
-                                closure_data->callable_info,
+                                callback_data->callable_info,
                                 (GArgument *) result);
 
         g_free (scm_args);
 
-        if (closure_data->scope_type == GI_SCOPE_TYPE_ASYNC)
+        if (callback_data->scope_type == GI_SCOPE_TYPE_ASYNC)
                 /* FIXME: We are leaking in case of GI_SCOPE_TYPE_NOTIFIED */
-                scm_gc_unprotect_object (closure_data->scm_callback);
+                callback_data_free (callback_data);
 }
 
 static SCM
