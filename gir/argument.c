@@ -73,11 +73,44 @@ callback_data_free (CallbackData *data)
         g_slice_free (CallbackData, data);
 }
 
+typedef struct
+{
+        ffi_cif *cif;
+        CallbackData *callback_data;
+} DestroyNotifyData;
+
+static DestroyNotifyData *
+destroy_notify_data_new (CallbackData *callback_data)
+{
+        DestroyNotifyData *data;
+
+        data = g_slice_new0 (DestroyNotifyData);
+        data->cif = g_slice_new0 (ffi_cif);
+        data->callback_data = callback_data;
+
+        return data;
+}
+
+static void
+destroy_notify_data_free (DestroyNotifyData *data)
+{
+        callback_data_free (data->callback_data);
+
+        g_slice_free (ffi_cif, data->cif);
+        g_slice_free (DestroyNotifyData, data);
+}
+
 static void
 callback_closure (ffi_cif *cif,
                   void    *result,
                   void   **args,
                   void    *data);
+
+static void
+destroy_notify_callback (ffi_cif *cif,
+                         void    *result,
+                         void   **args,
+                         void    *data);
 
 SCM
 gi_return_value_to_scm (GICallableInfo *info,
@@ -357,6 +390,25 @@ scm_to_gi_interface (SCM             scm_arg,
                                         callback_closure,
                                         data);
 
+                        if (scope_type == GI_SCOPE_TYPE_NOTIFIED) {
+                                DestroyNotifyData *destroy_data;
+                                GITypeInfo *destroy_type;
+                                GIBaseInfo *base_info;
+
+                                destroy_type = g_arg_info_get_type (
+                                                                destroy_info);
+                                base_info = g_type_info_get_interface (
+                                                                destroy_type);
+
+                                destroy_data = destroy_notify_data_new (data);
+
+                                destroy_arg->v_pointer =
+                                        g_callable_info_prepare_closure (
+                                                base_info,
+                                                destroy_data->cif,
+                                                destroy_notify_callback,
+                                                destroy_data);
+                        }
                         break;
                 }
                 default:
@@ -406,8 +458,16 @@ callback_closure (ffi_cif *cif,
         g_free (scm_args);
 
         if (callback_data->scope_type == GI_SCOPE_TYPE_ASYNC)
-                /* FIXME: We are leaking in case of GI_SCOPE_TYPE_NOTIFIED */
                 callback_data_free (callback_data);
+}
+
+static void
+destroy_notify_callback (ffi_cif *cif,
+                         void    *result,
+                         void   **args,
+                         void    *data)
+{
+        destroy_notify_data_free ((DestroyNotifyData *) data);
 }
 
 static SCM
