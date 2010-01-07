@@ -107,7 +107,9 @@ scm_return_value_to_gi (SCM             scm_return,
                        return_type,
                        transfer_type,
                        GI_SCOPE_TYPE_INVALID,
-                       return_value);
+                       NULL,
+                       return_value,
+                       NULL);
 }
 
 SCM
@@ -213,11 +215,13 @@ gi_interface_to_scm (GITypeInfo *arg_type,
 }
 
 void
-scm_to_gi_arg (SCM         scm_arg,
-               GITypeInfo *arg_type,
-               GITransfer  transfer_type,
-               GIScopeType scope_type,
-               GArgument  *arg)
+scm_to_gi_arg (SCM             scm_arg,
+               GITypeInfo     *arg_type,
+               GITransfer      transfer_type,
+               GIScopeType     scope_type,
+               GICallableInfo *destroy_info,
+               GArgument      *arg,
+               GArgument      *destroy_arg)
 {
         switch (g_type_info_get_tag (arg_type)) {
                 case GI_TYPE_TAG_VOID:
@@ -291,7 +295,9 @@ scm_to_gi_arg (SCM         scm_arg,
                                              transfer_type,
                                              scope_type,
                                              base_info,
-                                             arg);
+                                             destroy_info,
+                                             arg,
+                                             destroy_arg);
                         break;
                 }
                 default:
@@ -300,12 +306,14 @@ scm_to_gi_arg (SCM         scm_arg,
 }
 
 void
-scm_to_gi_interface (SCM         scm_arg,
-                     GIInfoType  arg_type,
-                     GITransfer  transfer_type,
-                     GIScopeType scope_type,
-                     GIBaseInfo *info,
-                     GArgument  *arg)
+scm_to_gi_interface (SCM             scm_arg,
+                     GIInfoType      arg_type,
+                     GITransfer      transfer_type,
+                     GIScopeType     scope_type,
+                     GIBaseInfo     *info,
+                     GICallableInfo *destroy_info,
+                     GArgument      *arg,
+                     GArgument      *destroy_arg)
 {
         gpointer *c_instance;
 

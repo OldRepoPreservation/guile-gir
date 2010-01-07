@@ -46,7 +46,9 @@ scm_to_gi_arg                           (SCM                    scm_arg,
                                          GITypeInfo            *arg_type,
                                          GITransfer             transfer_type,
                                          GIScopeType            scope_type,
-                                         GArgument             *arg);
+                                         GICallableInfo        *destroy_info,
+                                         GArgument             *arg,
+                                         GArgument             *destroy_arg);
 
 G_GNUC_INTERNAL SCM
 gi_interface_to_scm                     (GITypeInfo            *arg_type,
@@ -59,7 +61,9 @@ scm_to_gi_interface                     (SCM                    scm_arg,
                                          GITransfer             transfer_type,
                                          GIScopeType            scope_type,
                                          GIBaseInfo            *info,
-                                         GArgument             *arg);
+                                         GICallableInfo        *destroy_info,
+                                         GArgument             *arg,
+                                         GArgument             *destroy_arg);
 
 G_GNUC_INTERNAL void
 argument_init                           (void);

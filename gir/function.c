@@ -61,9 +61,13 @@ construct_in_args (GICallableInfo *callable_info,
         GArgument *in_args;
         int n_args;
         int i;
+        int destroy;
+        int closure;
 
         in_args = NULL;
         *n_in_args = 0;
+        destroy = -1;
+        closure = -1;
         n_args = g_callable_info_get_n_args (callable_info);
 
         /* FIXME: We are allocating array for all arguments although it only
@@ -87,7 +91,9 @@ construct_in_args (GICallableInfo *callable_info,
                                      GI_TRANSFER_NOTHING,
                                      GI_SCOPE_TYPE_INVALID,
                                      container,
-                                     &in_args[*n_in_args]);
+                                     NULL,
+                                     &in_args[*n_in_args],
+                                     NULL);
 
                 (*n_in_args)++;
         } else
@@ -95,10 +101,12 @@ construct_in_args (GICallableInfo *callable_info,
 
         for (i = 0; i < n_args; i++) {
                 GIArgInfo *arg_info;
+                GIArgInfo *destroy_info;
                 GITypeInfo *arg_type;
                 GIDirection direction;
                 GITransfer transfer;
                 GIScopeType scope;
+                GArgument *destroy_arg;
                 SCM arg;
 
                 arg_info = g_callable_info_get_arg (callable_info, i);
@@ -109,13 +117,26 @@ construct_in_args (GICallableInfo *callable_info,
                 arg_type = g_arg_info_get_type (arg_info);
                 transfer = g_arg_info_get_ownership_transfer (arg_info);
                 scope = g_arg_info_get_scope (arg_info);
+                destroy = g_arg_info_get_destroy (arg_info);
+                closure = g_arg_info_get_closure (arg_info);
+
+                if (destroy >= 0) {
+                        destroy_info = g_callable_info_get_arg (callable_info,
+                                                                destroy);
+                        destroy_arg = &in_args[destroy];
+                } else {
+                        destroy_info = NULL;
+                        destroy_arg = NULL;
+                }
 
                 arg = scm_list_ref (scm_in_args, scm_from_int (*n_in_args));
                 scm_to_gi_arg (arg,
                                arg_type,
                                transfer,
                                scope,
-                               &in_args[*n_in_args]);
+                               (GICallableInfo *) destroy_info,
+                               &in_args[*n_in_args],
+                               destroy_arg);
 
                 (*n_in_args)++;
         }
