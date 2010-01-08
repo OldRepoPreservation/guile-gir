@@ -33,81 +33,80 @@
 (assert (not (unspecified? test-obj-info)))
 
 (define (call func args)
-    (display "Calling '")
-    (display (g-function-info-get-symbol func))
-    (display "'..")
-    (let ((out-args (call-with-values (lambda () (g-function-info-invoke func
-                                                                         args))
-                                      list)))
-         (display "DONE.\n")
-         out-args))
+  (display "Calling '")
+  (display (g-function-info-get-symbol func))
+  (display "'..")
+  (let ((out-args (call-with-values (lambda () (g-function-info-invoke func
+                                                                       args))
+                                    list)))
+    (display "DONE.\n")
+    out-args))
 
 (define (simple-call func-name args)
-    (let ((func (g-irepository-find-by-name repo namespace func-name)))
-         (call func args)))
+  (let ((func (g-irepository-find-by-name repo namespace func-name)))
+    (call func args)))
 
 (define (method-call obj-info method-name args)
-    (let ((method (g-object-info-find-method obj-info method-name)))
-         (call method args)))
+  (let ((method (g-object-info-find-method obj-info method-name)))
+    (call method args)))
 
 ;; UTF-8 related functions
 
 ;; functions dealing with constant strings
 (define (test-utf8-const-in str)
-        (simple-call "test_utf8_const_in" (list str)))
+  (simple-call "test_utf8_const_in" (list str)))
 
 (define (test-utf8-const-return)
-        (simple-call "test_utf8_const_return" '()))
+  (simple-call "test_utf8_const_return" '()))
 
 ;; functions dealing with non-constant strings
 (define (test-utf8-nonconst-in str)
-        (simple-call "test_utf8_nonconst_in" (list str)))
+  (simple-call "test_utf8_nonconst_in" (list str)))
 
 (define (test-utf8-nonconst-return)
-        (simple-call "test_utf8_nonconst_return" '()))
+  (simple-call "test_utf8_nonconst_return" '()))
 
 (define (test-utf8-out)
-        (simple-call "test_utf8_out" '()))
+  (simple-call "test_utf8_out" '()))
 
 ;; functions dealing with complex types
 (define (test-simple-boxed-a-const-return)
-        (simple-call "test_simple_boxed_a_const_return" '()))
+  (simple-call "test_simple_boxed_a_const_return" '()))
 
 ;; Douglas Adams is a great writer but he got the number wrong. It's 47, not 42.
 (define (test-callback)
-        (let* ((meaning-of-life 47)
-               (number (car (simple-call "test_callback"
-                                         (list (lambda () meaning-of-life))))))
-              (assert (equal? number meaning-of-life))))
+  (let* ((meaning-of-life 47)
+         (number (car (simple-call "test_callback"
+                                   (list (lambda () meaning-of-life))))))
+    (assert (equal? number meaning-of-life))))
 
 ;; user-data is useless in Scheme since we have closures at our disposal but
 ;; lets use it, just for the sake of completeness.
 (define (test-callback-destroy-notify)
-        (let* ((meaning-of-life 47)
-               (number (car (simple-call "test_callback_destroy_notify"
-                                         (list (lambda (user-data)
-                                                       meaning-of-life)
-                                               #f
-                                               display)))))
-              (assert (equal? number meaning-of-life))))
+  (let* ((meaning-of-life 47)
+         (number (car (simple-call "test_callback_destroy_notify"
+                                   (list (lambda (user-data) meaning-of-life)
+                                         #f
+                                         display)))))
+    (assert (equal? number meaning-of-life))))
 
-; Methods
+;; Methods
 (define (test-obj-static-method)
-        (method-call test-obj-info "static_method" (list 47)))
+  (method-call test-obj-info "static_method" (list 47)))
 
 (define (test-obj-new-from-file)
-        (car (method-call test-obj-info "new_from_file" (list "hi"))))
+  (car (method-call test-obj-info "new_from_file" (list "hi"))))
 
 (define (test-obj-do-matrix test-obj)
-        (method-call test-obj-info "do_matrix" (list test-obj "hello")))
+  (method-call test-obj-info "do_matrix" (list test-obj "hello")))
 
 (define (test-obj-instance-method test-obj)
-        (method-call test-obj-info "instance_method" (list test-obj)))
+  (method-call test-obj-info "instance_method" (list test-obj)))
 
 (define (test-obj-set-bare test-obj another-obj)
-        (method-call test-obj-info "set_bare" (list test-obj another-obj)))
+  (method-call test-obj-info "set_bare" (list test-obj another-obj)))
 
-; Now we test each toplevel static function
+;; Now we test each toplevel static function
 (test-utf8-const-in (car (test-utf8-const-return)))
 (test-utf8-nonconst-in (car (test-utf8-nonconst-return)))
 (test-utf8-out)
@@ -116,11 +115,11 @@
 (test-callback)
 (test-callback-destroy-notify)
 
-; First test TestObj methods
+;; First test TestObj methods
 (test-obj-static-method)
 (let ((test-obj (test-obj-new-from-file)))
-     (test-obj-do-matrix test-obj)
-     (test-obj-instance-method test-obj)
-     (let ((another-obj (test-obj-new-from-file)))
-          (test-obj-set-bare test-obj another-obj)))
+  (test-obj-do-matrix test-obj)
+  (test-obj-instance-method test-obj)
+  (let ((another-obj (test-obj-new-from-file)))
+    (test-obj-set-bare test-obj another-obj)))
 
