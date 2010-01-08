@@ -1,4 +1,4 @@
-EXTRA_DIST =
+EXTRA_DIST = everything.scm
 
 TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_srcdir)/gir/.libs \
 		    GUILE_LOAD_PATH=$(top_srcdir)/gir $(GUILE) -s
