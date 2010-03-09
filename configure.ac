@@ -18,6 +18,7 @@ AC_SUBST(LIBLTDL)
 dnl Check for guile
 GUILE_FLAGS
 GUILE_SITE_DIR
+GUILE_PROGS
 
 dnl Check for girepository
 PKG_CHECK_MODULES(GIR, gobject-introspection-1.0 >= 0.6.5)
