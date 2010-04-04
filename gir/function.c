@@ -306,7 +306,10 @@ scm_g_function_info_invoke (SCM scm_info,
                                 &error);
         if (error) {
                 /* FIXME: Throw Guile error here */
-                g_critical ("Failed to load typelib: %s", error->message);
+                g_critical ("Failed to invoke function: %s", error->message);
+
+                g_error_free (error);
+
                 return SCM_UNSPECIFIED;
         }
 
